@@ -7,15 +7,15 @@ import write from "write";
 
 const yourToken = '';
 
-// github settings
 const GITHUB_API_BASE = "https://api.github.com/repos";
 const GITHUB_HEADERS = {
   Accept: "application/vnd.github.preview+json",
   Authorization: `Bearer ${yourToken}`,
 };
 
+// Credit to @made-in-nigeria for most of the code here
+// Source code for the fetching and parsing code can be found here https://github.com/acekyd/made-in-nigeria/blob/main/app/utils/projects.ts
 
-// step 1: fetch all repositories from made-in-nigeria
 const getData = async () => {
   const response = await fetch(
     "https://raw.githubusercontent.com/acekyd/made-in-nigeria/main/README.MD"
@@ -42,17 +42,16 @@ const getData = async () => {
   const repositories = convertToJSON(liTextArray);
 
   // step 6: add watchers_count to each repository object
-  const updatedRepositories = await addWatchersCount(repositories);
+  const updatedRepositories = await addstars(repositories);
 
-  // sort repositories by watchersCount
-  updatedRepositories.sort((a, b) => (b.watchersCount || 0) - (a.watchersCount || 0));
+  // sort repositories by stars
+  updatedRepositories.sort((a, b) => (b.stars || 0) - (a.stars || 0));
 
   // export sorted data to CSV
   exportToCSV(updatedRepositories);
   console.log("Data exported to 'repositories.csv'.");
 };
 
-// Function to process repository data
 function convertToJSON(repositories: string[]) {
   return repositories.map((repository) => {
     const $ = cheerio.load(repository);
@@ -83,8 +82,7 @@ function convertToJSON(repositories: string[]) {
   });
 }
 
-// get repository stars and add the key & value to the object
-const addWatchersCount = async (repositories: any[]) => {
+const addstars = async (repositories: any[]) => {
   const updatedRepositories = [];
 
   for (const repo of repositories) {
@@ -92,7 +90,7 @@ const addWatchersCount = async (repositories: any[]) => {
       // step 1: get username and repoName from the repoLink
       const match = repo.repoLink.match(/github\.com\/([^/]+)\/([^/]+)/);
       if (!match) {
-        updatedRepositories.push({ ...repo, watchersCount: null });
+        updatedRepositories.push({ ...repo, stars: null });
         continue;
       }
 
@@ -109,13 +107,13 @@ const addWatchersCount = async (repositories: any[]) => {
       }
 
       const apiData = await apiResponse.json();
-      const watchersCount = apiData.watchers_count || 0;
+      const stars = apiData.watchers_count || 0;
 
       // step 3: add watchers_count to the repository object
-      updatedRepositories.push({ ...repo, watchersCount });
+      updatedRepositories.push({ ...repo, stars });
     } catch (error) {
       console.error(`Error processing repository ${repo.repoLink}:`, error);
-      updatedRepositories.push({ ...repo, watchersCount: null });
+      updatedRepositories.push({ ...repo, stars: null });
     }
   }
 
@@ -130,7 +128,7 @@ const exportToCSV = async (repositories: any[]) => {
     "repoDescription",
     "repoAuthor",
     "repoAuthorLink",
-    "watchersCount",
+    "stars",
     "isInactive",
     "isArchived",
   ];
