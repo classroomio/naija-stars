@@ -1,15 +1,13 @@
-import { marked } from "marked";
-import { parse } from "json2csv";
-import * as cheerio from "cheerio";
+// deno-lint-ignore-file no-explicit-any
+import { mdConverter } from '@ptm/mm-mark';
+import { DOMParser } from '@b-fuze/deno-dom';
 
-// used write because fs is under a security vulnerability thingy according to npm
-import write from "write";
-
+// adding your token increases the number of requests you can make
 const yourToken = '';
 
-const GITHUB_API_BASE = "https://api.github.com/repos";
+const GITHUB_API_BASE = 'https://api.github.com/repos';
 const GITHUB_HEADERS = {
-  Accept: "application/vnd.github.preview+json",
+  Accept: 'application/vnd.github.preview+json',
   Authorization: `Bearer ${yourToken}`,
 };
 
@@ -18,57 +16,119 @@ const GITHUB_HEADERS = {
 
 const getData = async () => {
   const response = await fetch(
-    "https://raw.githubusercontent.com/acekyd/made-in-nigeria/main/README.MD"
+    'https://raw.githubusercontent.com/acekyd/made-in-nigeria/main/README.MD'
   );
 
   if (!response.ok) {
-    throw new Error("Failed to fetch data");
+    throw new Error('Failed to fetch data');
   }
 
   const markdownData = await response.text();
+  const converter = mdConverter(/*{Showdown Options} */);
 
   // step 2: convert Markdown to HTML
-  const html = marked(markdownData);
-
-  // step 3: load HTML into Cheerio
-  const $ = cheerio.load(html);
+  const html = converter.makeHtml(markdownData);
 
   // step 4: extract <li> elements
-  const liTextArray = $("li")
-    .map((index, element) => $(element).html())
-    .get();
+  const parser = new DOMParser();
+  const document = parser.parseFromString(html, 'text/html');
+
+  // step 4: Extract <li> elements and store them in an array
+  const liTextArray = Array.from(document.querySelectorAll('li')).map(
+    (li) => li.innerHTML
+  );
 
   // step 5: convert to JSON
-  const repositories = convertToJSON(liTextArray);
+  const parsedRepos = convertToJSON(liTextArray);
 
-  // step 6: add watchers_count to each repository object
-  const updatedRepositories = await addstars(repositories);
+  // step 6: add stars to each repository object
+  const updatedRepositories = await addstars(parsedRepos);
 
-  // sort repositories by stars
+  // step 7: sort repositories by stars
   updatedRepositories.sort((a, b) => (b.stars || 0) - (a.stars || 0));
 
-  // export sorted data to CSV
-  exportToCSV(updatedRepositories);
-  console.log("Data exported to 'repositories.csv'.");
+  // step 8: convert sorted repositories to CSV string
+  const finalOutput = convertToCSV(updatedRepositories);
+
+  // step 9: save CSV file
+  const filePath = './repositories.csv';
+  await Deno.writeTextFile(filePath, finalOutput);
+  console.log(`CSV file saved at ${filePath}`);
 };
+
+const addstars = async (repositories: any[]) => {
+  const updatedRepositories = [];
+
+  for (const repo of repositories) {
+    try {
+      // Step 1: get username and repoName from the repoLink
+      const match = repo.repoLink.match(/github\.com\/([^/]+)\/([^/]+)/);
+      if (!match) {
+        updatedRepositories.push({ ...repo, stars: null });
+        continue;
+      }
+
+      const username = match[1];
+      const repoName = match[2];
+
+      // Step 2: get watchers_count from github API
+      const apiResponse = await fetch(
+        `${GITHUB_API_BASE}/${username}/${repoName}`,
+        {
+          headers: GITHUB_HEADERS,
+        }
+      );
+
+      const apiData = await apiResponse.json();
+      const stars = apiData.watchers_count || 0;
+
+      // Step 3: add watchers_count to the repository object
+      updatedRepositories.push({ ...repo, stars });
+    } catch (error) {
+      console.error(`Error processing repository ${repo.repoLink}:`, error);
+      updatedRepositories.push({ ...repo, stars: null });
+    }
+  }
+
+  // Convert the updated repositories into a CSV string format
+  // const csvString = convertToCSVString(updatedRepositories);
+  return updatedRepositories;
+};
+
 
 function convertToJSON(repositories: string[]) {
   return repositories.map((repository) => {
-    const $ = cheerio.load(repository);
+    // Create a new DOMParser instance
+    const parser = new DOMParser();
+
+    // Parse the HTML string into a DOM object
+    const doc = parser.parseFromString(repository, 'text/html');
 
     // Extract repository details
-    const repoName = $("a").first().text();
-    const repoLink = $("a").first().attr("href");
+    const repoName = doc.querySelector('a')?.textContent?.trim() || '';
+    const repoLink = doc.querySelector('a')?.getAttribute('href') || '';
 
-    const status = $("span").first().text();
-    const isInactive = status?.includes("Inactive");
-    const isArchived = status?.includes("Archived");
+    const status = doc.querySelector('span')?.textContent || '';
+    const isInactive = status.includes('Inactive');
+    const isArchived = status.includes('Archived');
 
-    let description = $("*").contents()[3]?.data || "";
-    const repoDescription = description.replace(/^ - /, "");
+    // Extract the description
+    const repoDescription = Array.from(doc.body.childNodes)
+      .filter(
+        (node) =>
+          node.nodeType === node.TEXT_NODE && node.textContent?.trim().length
+      )
+      .map((node) => node.textContent?.trim())
+      .join(' ') // Join all text nodes into a single string
+      .split('-') // Split the string by dashes
+      .slice(1) // Remove the first part before the first dash
+      .join('-') // Rejoin the split parts with dashes
+      .split('@')[0] // Take the part before the "@" symbol
+      .trim(); // Trim any extra spaces
 
-    const repoAuthor = $("strong a").text();
-    const repoAuthorLink = $("strong a").attr("href");
+    const repoAuthor = doc.querySelector('strong a')?.textContent?.trim() || '';
+    const repoAuthorLink =
+      doc.querySelector('strong a')?.getAttribute('href') || '';
 
     return {
       repoName,
@@ -82,63 +142,17 @@ function convertToJSON(repositories: string[]) {
   });
 }
 
-const addstars = async (repositories: any[]) => {
-  const updatedRepositories = [];
+function convertToCSV(array: any) {
+  // Get the headers from the object keys
+  const headers = Object.keys(array[0]);
 
-  for (const repo of repositories) {
-    try {
-      // step 1: get username and repoName from the repoLink
-      const match = repo.repoLink.match(/github\.com\/([^/]+)\/([^/]+)/);
-      if (!match) {
-        updatedRepositories.push({ ...repo, stars: null });
-        continue;
-      }
+  // Map the data to an array of strings, where each element is a row in CSV
+  const rows = array.map((obj) => {
+    return headers.map((header) => JSON.stringify(obj[header] || '')).join(',');
+  });
 
-      const username = match[1];
-      const repoName = match[2];
+  // Combine the headers and rows to form the final CSV string
+  return [headers.join(','), ...rows].join('\n');
+}
 
-      // step 2: get watchers_count from github API
-      const apiResponse = await fetch(`${GITHUB_API_BASE}/${username}/${repoName}`, {
-        headers: GITHUB_HEADERS,
-      });
-
-      if (!apiResponse.ok) {
-        throw new Error(`Failed to fetch GitHub data for ${username}/${repoName}`);
-      }
-
-      const apiData = await apiResponse.json();
-      const stars = apiData.watchers_count || 0;
-
-      // step 3: add watchers_count to the repository object
-      updatedRepositories.push({ ...repo, stars });
-    } catch (error) {
-      console.error(`Error processing repository ${repo.repoLink}:`, error);
-      updatedRepositories.push({ ...repo, stars: null });
-    }
-  }
-
-  return updatedRepositories;
-};
-
-// function to export data to CSV
-const exportToCSV = async (repositories: any[]) => {
-  const fields = [
-    "repoName",
-    "repoLink",
-    "repoDescription",
-    "repoAuthor",
-    "repoAuthorLink",
-    "stars",
-    "isInactive",
-    "isArchived",
-  ];
-
-  const opts = { fields };
-  try {
-    const csv = parse(repositories, opts);
-    await write("repositories.csv", csv);
-    console.log("CSV file created successfully.");
-  } catch (err) {
-    console.error("Error generating CSV:", err);
-  }
-};
+getData();
