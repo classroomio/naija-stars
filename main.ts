@@ -1,8 +1,8 @@
 // deno-lint-ignore-file no-explicit-any
 import { mdConverter } from '@ptm/mm-mark';
 import { DOMParser } from '@b-fuze/deno-dom';
+import { serve } from "https://deno.land/std/http/mod.ts";
 
-// adding your token increases the number of requests you can make
 const yourToken = '';
 
 const GITHUB_API_BASE = 'https://api.github.com/repos';
@@ -11,10 +11,20 @@ const GITHUB_HEADERS = {
   Authorization: `Bearer ${yourToken}`,
 };
 
-// Credit to @made-in-nigeria for most of the code here
-// Source code for the fetching and parsing code can be found here https://github.com/acekyd/made-in-nigeria/blob/main/app/utils/projects.ts
+// In-memory cache object
+let cache: { data: any; lastFetched: number } | null = null;
+const CACHE_DURATION = 60 * 60 * 1000;
 
 const getData = async () => {
+  const now = Date.now();
+
+  // check if cache exists and is valid
+  if (cache && now - cache.lastFetched < CACHE_DURATION) {
+    console.log("Serving data from cache...");
+    return cache.data;
+  }
+
+  console.log("Fetching fresh data...");
   const response = await fetch(
     'https://raw.githubusercontent.com/acekyd/made-in-nigeria/main/README.MD'
   );
@@ -24,36 +34,28 @@ const getData = async () => {
   }
 
   const markdownData = await response.text();
-  const converter = mdConverter(/*{Showdown Options} */);
+  const converter = mdConverter();
 
-  // step 2: convert Markdown to HTML
   const html = converter.makeHtml(markdownData);
-
-  // step 4: extract <li> elements
   const parser = new DOMParser();
   const document = parser.parseFromString(html, 'text/html');
 
-  // step 4: Extract <li> elements and store them in an array
   const liTextArray = Array.from(document.querySelectorAll('li')).map(
     (li) => li.innerHTML
   );
 
-  // step 5: convert to JSON
   const parsedRepos = convertToJSON(liTextArray);
-
-  // step 6: add stars to each repository object
   const updatedRepositories = await addstars(parsedRepos);
 
-  // step 7: sort repositories by stars
   updatedRepositories.sort((a, b) => (b.stars || 0) - (a.stars || 0));
 
-  // step 8: convert sorted repositories to CSV string
-  const finalOutput = convertToCSV(updatedRepositories);
+  // cache the fetched data with the current timestamp
+  cache = {
+    data: updatedRepositories,
+    lastFetched: now,
+  };
 
-  // step 9: save CSV file
-  const filePath = './repositories.csv';
-  await Deno.writeTextFile(filePath, finalOutput);
-  console.log(`CSV file saved at ${filePath}`);
+  return updatedRepositories;
 };
 
 const addstars = async (repositories: any[]) => {
@@ -61,7 +63,6 @@ const addstars = async (repositories: any[]) => {
 
   for (const repo of repositories) {
     try {
-      // Step 1: get username and repoName from the repoLink
       const match = repo.repoLink.match(/github\.com\/([^/]+)\/([^/]+)/);
       if (!match) {
         updatedRepositories.push({ ...repo, stars: null });
@@ -71,7 +72,6 @@ const addstars = async (repositories: any[]) => {
       const username = match[1];
       const repoName = match[2];
 
-      // Step 2: get watchers_count from github API
       const apiResponse = await fetch(
         `${GITHUB_API_BASE}/${username}/${repoName}`,
         {
@@ -82,7 +82,6 @@ const addstars = async (repositories: any[]) => {
       const apiData = await apiResponse.json();
       const stars = apiData.watchers_count || 0;
 
-      // Step 3: add watchers_count to the repository object
       updatedRepositories.push({ ...repo, stars });
     } catch (error) {
       console.error(`Error processing repository ${repo.repoLink}:`, error);
@@ -90,41 +89,32 @@ const addstars = async (repositories: any[]) => {
     }
   }
 
-  // Convert the updated repositories into a CSV string format
-  // const csvString = convertToCSVString(updatedRepositories);
   return updatedRepositories;
 };
 
-
 function convertToJSON(repositories: string[]) {
   return repositories.map((repository) => {
-    // Create a new DOMParser instance
     const parser = new DOMParser();
-
-    // Parse the HTML string into a DOM object
     const doc = parser.parseFromString(repository, 'text/html');
 
-    // Extract repository details
     const repoName = doc.querySelector('a')?.textContent?.trim() || '';
     const repoLink = doc.querySelector('a')?.getAttribute('href') || '';
-
     const status = doc.querySelector('span')?.textContent || '';
     const isInactive = status.includes('Inactive');
     const isArchived = status.includes('Archived');
 
-    // Extract the description
     const repoDescription = Array.from(doc.body.childNodes)
       .filter(
         (node) =>
           node.nodeType === node.TEXT_NODE && node.textContent?.trim().length
       )
       .map((node) => node.textContent?.trim())
-      .join(' ') // Join all text nodes into a single string
-      .split('-') // Split the string by dashes
-      .slice(1) // Remove the first part before the first dash
-      .join('-') // Rejoin the split parts with dashes
-      .split('@')[0] // Take the part before the "@" symbol
-      .trim(); // Trim any extra spaces
+      .join(' ')
+      .split('-')
+      .slice(1)
+      .join('-')
+      .split('@')[0]
+      .trim();
 
     const repoAuthor = doc.querySelector('strong a')?.textContent?.trim() || '';
     const repoAuthorLink =
@@ -142,17 +132,51 @@ function convertToJSON(repositories: string[]) {
   });
 }
 
-function convertToCSV(array: any) {
-  // Get the headers from the object keys
-  const headers = Object.keys(array[0]);
+const serveHtml = async (req: Request) => {
+  const url = new URL(req.url);
+  const path = url.pathname;
 
-  // Map the data to an array of strings, where each element is a row in CSV
-  const rows = array.map((obj) => {
-    return headers.map((header) => JSON.stringify(obj[header] || '')).join(',');
-  });
+  if (path === "/") {
+    const repositories = await getData();
+    const htmlTemplate = await Deno.readTextFile("./index.html");
 
-  // Combine the headers and rows to form the final CSV string
-  return [headers.join(','), ...rows].join('\n');
-}
+    const tableRows = repositories
+      .map(
+        (repo: any) => `
+        <tr>
+          <td><a href="${repo.repoLink}" target="_blank">${repo.repoName}</a></td>
+          <td>${repo.stars || 0}</td>
+          <td>${repo.repoDescription}</td>
+        </tr>`
+      )
+      .join("");
 
-getData();
+    const htmlContent = htmlTemplate.replace("<!-- TABLE_ROWS -->", tableRows);
+    return new Response(htmlContent, {
+      headers: { "Content-Type": "text/html" },
+    });
+  } else if (path.endsWith(".css")) {
+    try {
+      const css = await Deno.readTextFile(`.${path}`);
+      return new Response(css, {
+        headers: { "Content-Type": "text/css" },
+      });
+    } catch {
+      return new Response("CSS file not found", { status: 404 });
+    }
+  } else if (path.endsWith(".js")) {
+    try {
+      const js = await Deno.readTextFile(`.${path}`);
+      return new Response(js, {
+        headers: { "Content-Type": "application/javascript" },
+      });
+    } catch {
+      return new Response("JavaScript file not found", { status: 404 });
+    }
+  }
+
+  return new Response("Not Found", { status: 404 });
+};
+
+console.log("Server running on http://localhost:8000");
+serve((req) => serveHtml(req));
