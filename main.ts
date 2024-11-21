@@ -138,7 +138,7 @@ const serveHtml = async (req: Request) => {
 
   if (path === "/") {
     const repositories = await getData();
-    const htmlTemplate = await Deno.readTextFile("./index.html");
+    const htmlTemplate = await Deno.readTextFile("./web/index.html");
 
     const tableRows = repositories
       .map(
@@ -157,7 +157,7 @@ const serveHtml = async (req: Request) => {
     });
   } else if (path.endsWith(".css")) {
     try {
-      const css = await Deno.readTextFile(`.${path}`);
+      const css = await Deno.readTextFile(`./web${path}`);
       return new Response(css, {
         headers: { "Content-Type": "text/css" },
       });
@@ -166,7 +166,7 @@ const serveHtml = async (req: Request) => {
     }
   } else if (path.endsWith(".js")) {
     try {
-      const js = await Deno.readTextFile(`.${path}`);
+      const js = await Deno.readTextFile(`./web${path}`);
       return new Response(js, {
         headers: { "Content-Type": "application/javascript" },
       });
