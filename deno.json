@@ -5,5 +5,13 @@
   "imports": {
     "@b-fuze/deno-dom": "jsr:@b-fuze/deno-dom@^0.1.48",
     "@ptm/mm-mark": "jsr:@ptm/mm-mark@^0.2.22"
+  },
+  "deploy": {
+    "project": "0c35c570-b574-4fcc-ab58-81c72888063c",
+    "exclude": [
+      "**/node_modules"
+    ],
+    "include": [],
+    "entrypoint": "main.ts"
   }
 }
