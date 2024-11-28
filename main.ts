@@ -1,7 +1,17 @@
-// deno-lint-ignore-file no-explicit-any
 import { mdConverter } from '@ptm/mm-mark';
 import { DOMParser } from '@b-fuze/deno-dom';
 import { serve } from "https://deno.land/std/http/mod.ts";
+
+interface Repository {
+  repoName: string;
+  repoLink: string;
+  repoDescription: string;
+  repoAuthor: string;
+  repoAuthorLink: string;
+  isInactive: boolean;
+  isArchived: boolean;
+  stars: number | null; // Can be null if fetching stars fails
+}
 
 const yourToken = '';
 
@@ -12,13 +22,16 @@ const GITHUB_HEADERS = {
 };
 
 // In-memory cache object
-let cache: { data: any; lastFetched: number } | null = null;
+let cache: { data: Repository[]; lastFetched: number } | null = null;
 const CACHE_DURATION = 60 * 60 * 1000;
 
-const getData = async () => {
+// Initialize Deno KV
+const kv = await Deno.openKv();
+
+const getData = async (): Promise<Repository[]> => {
   const now = Date.now();
 
-  // check if cache exists and is valid
+  // Check if cache exists and is valid
   if (cache && now - cache.lastFetched < CACHE_DURATION) {
     console.log("Serving data from cache...");
     return cache.data;
@@ -44,22 +57,26 @@ const getData = async () => {
     (li) => li.innerHTML
   );
 
-  const parsedRepos = convertToJSON(liTextArray);
-  const updatedRepositories = await addstars(parsedRepos);
+  const parsedRepos: Repository[] = convertToJSON(liTextArray);
+  const updatedRepositories = await addStars(parsedRepos);
 
   updatedRepositories.sort((a, b) => (b.stars || 0) - (a.stars || 0));
 
-  // cache the fetched data with the current timestamp
+  // Cache the fetched data with the current timestamp
   cache = {
     data: updatedRepositories,
     lastFetched: now,
   };
 
+  // Save to Deno KV
+  await kv.set(["repositories"], { data: updatedRepositories });
+  console.log("Data saved to Deno KV");
+
   return updatedRepositories;
 };
 
-const addstars = async (repositories: any[]) => {
-  const updatedRepositories = [];
+const addStars = async (repositories: Repository[]): Promise<Repository[]> => {
+  const updatedRepositories: Repository[] = [];
 
   for (const repo of repositories) {
     try {
@@ -92,7 +109,7 @@ const addstars = async (repositories: any[]) => {
   return updatedRepositories;
 };
 
-function convertToJSON(repositories: string[]) {
+function convertToJSON(repositories: string[]): Repository[] {
   return repositories.map((repository) => {
     const parser = new DOMParser();
     const doc = parser.parseFromString(repository, 'text/html');
@@ -128,6 +145,7 @@ function convertToJSON(repositories: string[]) {
       repoAuthorLink,
       isInactive,
       isArchived,
+      stars: null, // Initial value; will be updated later
     };
   });
 }
@@ -137,12 +155,16 @@ const serveHtml = async (req: Request) => {
   const path = url.pathname;
 
   if (path === "/") {
-    const repositories = await getData();
+    const result = await kv.get(["repositories"]);
+    // deno-lint-ignore no-explicit-any
+    const repositories = (result?.value as { data: any[] })?.data || [];
+    console.log('kv repositories', repositories)
+
     const htmlTemplate = await Deno.readTextFile("./web/index.html");
 
     const tableRows = repositories
       .map(
-        (repo: any) => `
+        (repo: Repository) => `
         <tr>
           <td><a href="${repo.repoLink}" target="_blank">${repo.repoName}</a></td>
           <td>${repo.stars || 0}</td>
@@ -180,3 +202,10 @@ const serveHtml = async (req: Request) => {
 
 console.log("Server running on http://localhost:8000");
 serve((req) => serveHtml(req));
+
+// Set up a cron job to run every 3 hours
+Deno.cron("Sample Cron", "0 */3 * * *", async () => {
+  console.log("Running cron job...");
+  await getData();
+  console.log("Cron job completed.");
+});
