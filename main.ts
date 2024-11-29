@@ -1,9 +1,9 @@
 // deno-lint-ignore-file no-explicit-any
-import "jsr:@std/dotenv/load";
-import { neon } from "@neon/serverless";
+import 'jsr:@std/dotenv/load';
+import { neon } from '@neon/serverless';
 import { mdConverter } from '@ptm/mm-mark';
 import { DOMParser } from '@b-fuze/deno-dom';
-import { serve } from "https://deno.land/std/http/mod.ts";
+import { serve } from 'https://deno.land/std/http/mod.ts';
 
 interface Repository {
   repoName: string;
@@ -16,10 +16,9 @@ interface Repository {
   stars: number | null;
 }
 
-const yourToken = Deno.env.get("GITHUB_TOKEN")!;
-const databaseUrl = Deno.env.get("DATABASE_URL")!;
+const yourToken = Deno.env.get('GITHUB_TOKEN')!;
+const databaseUrl = Deno.env.get('DATABASE_URL')!;
 const sql = neon(databaseUrl);
-
 
 const GITHUB_API_BASE = 'https://api.github.com/repos';
 const GITHUB_HEADERS = {
@@ -28,8 +27,8 @@ const GITHUB_HEADERS = {
 };
 
 const getData = async () => {
-  console.log("Fetching Repositories From GitHub...");
-  
+  console.log('Fetching Repositories From GitHub...');
+
   const response = await fetch(
     'https://raw.githubusercontent.com/acekyd/made-in-nigeria/main/README.MD'
   );
@@ -37,7 +36,7 @@ const getData = async () => {
   if (!response.ok) {
     throw new Error('Failed to fetch data');
   }
-  console.log("Fetch Complete");
+  console.log('Fetch Complete');
 
   const markdownData = await response.text();
   const converter = mdConverter();
@@ -55,7 +54,7 @@ const getData = async () => {
 
   updatedRepositories.sort((a, b) => (b.stars || 0) - (a.stars || 0));
 
-  console.log('Saving to Neon Database...')
+  console.log('Saving to Neon Database...');
 
   for (const repo of updatedRepositories) {
     await sql`
@@ -86,7 +85,7 @@ const getData = async () => {
     `;
   }
 
-  console.log("Data saved to Neon.");
+  console.log('Data saved to Neon.');
 };
 
 const addStars = async (repositories: Repository[]): Promise<Repository[]> => {
@@ -168,23 +167,24 @@ const serveHtml = async (req: Request) => {
   const url = new URL(req.url);
   const path = url.pathname;
 
-  if (path === "/") {
-    console.log('Fetching Repositories from Neon...')
+  if (path === '/') {
+    console.log('Fetching Repositories from Neon...');
     let repositories: Repository[] = [];
 
     try {
-      repositories = (await sql<
-        {
-          repo_name: string;
-          repo_link: string;
-          repo_description: string;
-          repo_author: string;
-          repo_author_link: string;
-          is_inactive: boolean;
-          is_archived: boolean;
-          stars: number | null;
-        }[]
-      >`SELECT 
+      repositories = (
+        await sql<
+          {
+            repo_name: string;
+            repo_link: string;
+            repo_description: string;
+            repo_author: string;
+            repo_author_link: string;
+            is_inactive: boolean;
+            is_archived: boolean;
+            stars: number | null;
+          }[]
+        >`SELECT 
           repo_name, 
           repo_link, 
           repo_description, 
@@ -194,7 +194,8 @@ const serveHtml = async (req: Request) => {
           is_archived, 
           stars 
         FROM repositories
-        ORDER BY stars DESC;`).map((repo: any) => ({
+        ORDER BY stars DESC;`
+      ).map((repo: any) => ({
         repoName: repo.repo_name,
         repoLink: repo.repo_link,
         repoDescription: repo.repo_description,
@@ -204,59 +205,62 @@ const serveHtml = async (req: Request) => {
         isArchived: repo.is_archived,
         stars: repo.stars,
       }));
-      
-      console.log("Fetch Complete!");
-      
+
+      console.log('Fetch Complete!');
     } catch (error) {
-      console.error("Error fetching data from Neon:", error);
+      console.error('Error fetching data from Neon:', error);
     }
 
-    const htmlTemplate = await Deno.readTextFile("./web/index.html");
+    const htmlTemplate = await Deno.readTextFile('./web/index.html');
 
     const tableRows = repositories
       .map(
         (repo: Repository) => `
         <tr>
-          <td><a href="${repo.repoLink}" target="_blank">${repo.repoName}</a></td>
+          <td><a href="${repo.repoLink}" target="_blank">${
+          repo.repoName
+        }</a></td>
           <td>${repo.stars || 0}</td>
           <td>${repo.repoDescription}</td>
         </tr>`
       )
-      .join("");
+      .join('');
 
-    const htmlContent = htmlTemplate.replace("<!-- TABLE_ROWS -->", tableRows);
+    const htmlContent = htmlTemplate.replace('<!-- TABLE_ROWS -->', tableRows);
     return new Response(htmlContent, {
-      headers: { "Content-Type": "text/html" },
+      headers: { 'Content-Type': 'text/html' },
     });
-  } else if (path.endsWith(".css")) {
+  } else if (path.endsWith('.css')) {
     try {
       const css = await Deno.readTextFile(`./web${path}`);
       return new Response(css, {
-        headers: { "Content-Type": "text/css" },
+        headers: { 'Content-Type': 'text/css' },
       });
     } catch {
-      return new Response("CSS file not found", { status: 404 });
+      return new Response('CSS file not found', { status: 404 });
     }
-  } else if (path.endsWith(".js")) {
+  } else if (path.endsWith('.js')) {
     try {
       const js = await Deno.readTextFile(`./web${path}`);
       return new Response(js, {
-        headers: { "Content-Type": "application/javascript" },
+        headers: { 'Content-Type': 'application/javascript' },
       });
     } catch {
-      return new Response("JavaScript file not found", { status: 404 });
+      return new Response('JavaScript file not found', { status: 404 });
     }
   }
 
-  return new Response("Not Found", { status: 404 });
+  return new Response('Not Found', { status: 404 });
 };
 
-console.log("Server running on http://localhost:8000");
+console.log('Server running on http://localhost:8000');
 serve((req) => serveHtml(req));
 
+// /api/repositories
+
 // Cron Job to run every 3 hours for revalidation
-Deno.cron("Sample Cron", "0 */3 * * *", async () => {
-  console.log("Running cron job...");
+Deno.cron('Sample Cron', '0 */3 * * *', async () => {
+  console.log('Running cron job...');
   await getData();
-  console.log("Cron job completed.");
+  console.log('Cron job completed.');
 });
