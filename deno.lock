@@ -3,8 +3,11 @@
   "specifiers": {
     "jsr:@b-fuze/deno-dom@~0.1.48": "0.1.48",
     "jsr:@denosaurs/plug@1.0.3": "1.0.3",
+    "jsr:@neon/serverless@~0.10.4": "0.10.4",
     "jsr:@ptm/mm-mark@~0.2.22": "0.2.22",
     "jsr:@std/assert@~0.213.1": "0.213.1",
+    "jsr:@std/dotenv@*": "0.225.2",
+    "jsr:@std/dotenv@~0.225.2": "0.225.2",
     "jsr:@std/encoding@0.213.1": "0.213.1",
     "jsr:@std/fmt@0.213.1": "0.213.1",
     "jsr:@std/fs@0.213.1": "0.213.1",
@@ -31,6 +34,9 @@
         "jsr:@std/path@0.213.1"
       ]
     },
+    "@neon/serverless@0.10.4": {
+      "integrity": "90f212b09feb8ed8db0f45112587587e929bdf6676bf7b3a41e407f62d0870ca"
+    },
     "@ptm/mm-mark@0.2.22": {
       "integrity": "1e5dc732c172049f8189486091857a57f389c7cc532f960f96c87b783be2d28a",
       "dependencies": [
@@ -42,6 +48,9 @@
     },
     "@std/assert@0.213.1": {
       "integrity": "24c28178b30c8e0782c18e8e94ea72b16282207569cdd10ffb9d1d26f2edebfe"
+    },
+    "@std/dotenv@0.225.2": {
+      "integrity": "e2025dce4de6c7bca21dece8baddd4262b09d5187217e231b033e088e0c4dd23"
     },
     "@std/encoding@0.213.1": {
       "integrity": "fcbb6928713dde941a18ca5db88ca1544d0755ec8fb20fe61e2dc8144b390c62"
@@ -167,7 +176,9 @@
   "workspace": {
     "dependencies": [
       "jsr:@b-fuze/deno-dom@~0.1.48",
-      "jsr:@ptm/mm-mark@~0.2.22"
+      "jsr:@neon/serverless@~0.10.4",
+      "jsr:@ptm/mm-mark@~0.2.22",
+      "jsr:@std/dotenv@~0.225.2"
     ]
   }
 }

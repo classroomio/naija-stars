@@ -4,7 +4,9 @@
   },
   "imports": {
     "@b-fuze/deno-dom": "jsr:@b-fuze/deno-dom@^0.1.48",
-    "@ptm/mm-mark": "jsr:@ptm/mm-mark@^0.2.22"
+    "@neon/serverless": "jsr:@neon/serverless@^0.10.4",
+    "@ptm/mm-mark": "jsr:@ptm/mm-mark@^0.2.22",
+    "@std/dotenv": "jsr:@std/dotenv@^0.225.2"
   },
   "deploy": {
     "project": "0c35c570-b574-4fcc-ab58-81c72888063c",

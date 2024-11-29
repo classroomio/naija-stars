@@ -1,3 +1,6 @@
+// deno-lint-ignore-file no-explicit-any
+import "jsr:@std/dotenv/load";
+import { neon } from "@neon/serverless";
 import { mdConverter } from '@ptm/mm-mark';
 import { DOMParser } from '@b-fuze/deno-dom';
 import { serve } from "https://deno.land/std/http/mod.ts";
@@ -10,10 +13,13 @@ interface Repository {
   repoAuthorLink: string;
   isInactive: boolean;
   isArchived: boolean;
-  stars: number | null; // Can be null if fetching stars fails
+  stars: number | null;
 }
 
-const yourToken = '';
+const yourToken = Deno.env.get("GITHUB_TOKEN")!;
+const databaseUrl = Deno.env.get("DATABASE_URL")!;
+const sql = neon(databaseUrl);
+
 
 const GITHUB_API_BASE = 'https://api.github.com/repos';
 const GITHUB_HEADERS = {
@@ -21,23 +27,9 @@ const GITHUB_HEADERS = {
   Authorization: `Bearer ${yourToken}`,
 };
 
-// In-memory cache object
-let cache: { data: Repository[]; lastFetched: number } | null = null;
-const CACHE_DURATION = 60 * 60 * 1000;
-
-// Initialize Deno KV
-const kv = await Deno.openKv();
-
-const getData = async (): Promise<Repository[]> => {
-  const now = Date.now();
-
-  // Check if cache exists and is valid
-  if (cache && now - cache.lastFetched < CACHE_DURATION) {
-    console.log("Serving data from cache...");
-    return cache.data;
-  }
-
-  console.log("Fetching fresh data...");
+const getData = async () => {
+  console.log("Fetching Repositories From GitHub...");
+  
   const response = await fetch(
     'https://raw.githubusercontent.com/acekyd/made-in-nigeria/main/README.MD'
   );
@@ -45,6 +37,7 @@ const getData = async (): Promise<Repository[]> => {
   if (!response.ok) {
     throw new Error('Failed to fetch data');
   }
+  console.log("Fetch Complete");
 
   const markdownData = await response.text();
   const converter = mdConverter();
@@ -62,17 +55,38 @@ const getData = async (): Promise<Repository[]> => {
 
   updatedRepositories.sort((a, b) => (b.stars || 0) - (a.stars || 0));
 
-  // Cache the fetched data with the current timestamp
-  cache = {
-    data: updatedRepositories,
-    lastFetched: now,
-  };
+  console.log('Saving to Neon Database...')
 
-  // Save to Deno KV
-  await kv.set(["repositories"], { data: updatedRepositories });
-  console.log("Data saved to Deno KV");
+  for (const repo of updatedRepositories) {
+    await sql`
+      INSERT INTO repositories (
+        repo_name,
+        repo_link,
+        repo_description,
+        repo_author,
+        repo_author_link,
+        is_inactive,
+        is_archived,
+        stars
+      ) VALUES (
+        ${repo.repoName},
+        ${repo.repoLink},
+        ${repo.repoDescription},
+        ${repo.repoAuthor},
+        ${repo.repoAuthorLink},
+        ${repo.isInactive},
+        ${repo.isArchived},
+        ${repo.stars || 0}
+      )
+      ON CONFLICT (repo_link) DO UPDATE
+      SET
+        stars = EXCLUDED.stars,
+        is_inactive = EXCLUDED.is_inactive,
+        is_archived = EXCLUDED.is_archived;
+    `;
+  }
 
-  return updatedRepositories;
+  console.log("Data saved to Neon.");
 };
 
 const addStars = async (repositories: Repository[]): Promise<Repository[]> => {
@@ -155,10 +169,47 @@ const serveHtml = async (req: Request) => {
   const path = url.pathname;
 
   if (path === "/") {
-    const result = await kv.get(["repositories"]);
-    // deno-lint-ignore no-explicit-any
-    const repositories = (result?.value as { data: any[] })?.data || [];
-    console.log('kv repositories', repositories)
+    console.log('Fetching Repositories from Neon...')
+    let repositories: Repository[] = [];
+
+    try {
+      repositories = (await sql<
+        {
+          repo_name: string;
+          repo_link: string;
+          repo_description: string;
+          repo_author: string;
+          repo_author_link: string;
+          is_inactive: boolean;
+          is_archived: boolean;
+          stars: number | null;
+        }[]
+      >`SELECT 
+          repo_name, 
+          repo_link, 
+          repo_description, 
+          repo_author, 
+          repo_author_link, 
+          is_inactive, 
+          is_archived, 
+          stars 
+        FROM repositories
+        ORDER BY stars DESC;`).map((repo: any) => ({
+        repoName: repo.repo_name,
+        repoLink: repo.repo_link,
+        repoDescription: repo.repo_description,
+        repoAuthor: repo.repo_author,
+        repoAuthorLink: repo.repo_author_link,
+        isInactive: repo.is_inactive,
+        isArchived: repo.is_archived,
+        stars: repo.stars,
+      }));
+      
+      console.log("Fetch Complete!");
+      
+    } catch (error) {
+      console.error("Error fetching data from Neon:", error);
+    }
 
     const htmlTemplate = await Deno.readTextFile("./web/index.html");
 
@@ -203,7 +254,7 @@ const serveHtml = async (req: Request) => {
 console.log("Server running on http://localhost:8000");
 serve((req) => serveHtml(req));
 
-// Set up a cron job to run every 3 hours
+// Cron Job to run every 3 hours for revalidation
 Deno.cron("Sample Cron", "0 */3 * * *", async () => {
   console.log("Running cron job...");
   await getData();
