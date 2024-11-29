@@ -1,18 +1,26 @@
 {
   "tasks": {
-    "dev": "deno run --watch main.ts"
+    "dev": "deno run -A --node-modules-dir npm:vite",
+    "build": "deno run -A --node-modules-dir npm:vite build",
+    "preview": "deno run -A --node-modules-dir npm:vite preview",
+    "serve": "deno run --allow-net --allow-read jsr:@std/http@1/file-server dist/"
+  },
+  "compilerOptions": {
+    "lib": ["ES2020", "DOM", "DOM.Iterable"]
   },
   "imports": {
     "@b-fuze/deno-dom": "jsr:@b-fuze/deno-dom@^0.1.48",
+    "@deno/vite-plugin": "npm:@deno/vite-plugin@^1.0.1",
     "@neon/serverless": "jsr:@neon/serverless@^0.10.4",
     "@ptm/mm-mark": "jsr:@ptm/mm-mark@^0.2.22",
-    "@std/dotenv": "jsr:@std/dotenv@^0.225.2"
+    "@std/dotenv": "jsr:@std/dotenv@^0.225.2",
+    "@sveltejs/vite-plugin-svelte": "npm:@sveltejs/vite-plugin-svelte@^5.0.1",
+    "svelte": "npm:svelte@^5.2.9",
+    "vite": "npm:vite@^6.0.1"
   },
   "deploy": {
     "project": "0c35c570-b574-4fcc-ab58-81c72888063c",
-    "exclude": [
-      "**/node_modules"
-    ],
+    "exclude": ["**/node_modules"],
     "include": [],
     "entrypoint": "main.ts"
   }
