@@ -1,17 +1,13 @@
 <script lang="ts">
+  import { Repository } from './../../../../utils/getData.ts';
   import { readable } from 'svelte/store';
-  import {
-    Render,
-    Subscribe,
-    createRender,
-    createTable,
-  } from 'svelte-headless-table';
+  import { Render, Subscribe, createRender, createTable } from 'svelte-headless-table';
   import {
     addHiddenColumns,
     addPagination,
     addSelectedRows,
     addSortBy,
-    addTableFilter,
+    addTableFilter
   } from 'svelte-headless-table/plugins';
   import ArrowUpDown from 'lucide-svelte/icons/arrow-up-down';
   import ChevronDown from 'lucide-svelte/icons/chevron-down';
@@ -26,6 +22,7 @@
   // Dialog logic here
   import * as Dialog from '$lib/components/dialog';
   import { Label } from '$lib/components/label';
+  import { onMount } from 'svelte';
 
   type Payment = {
     id: string;
@@ -34,47 +31,49 @@
     email: string;
   };
 
+  let repositories: Repository[] = [];
+
   const data: Payment[] = [
     {
       id: 'm5gr84i9',
       amount: 316,
       status: 'Success',
-      email: 'ken99@yahoo.com',
+      email: 'ken99@yahoo.com'
     },
     {
       id: '3u1reuv4',
       amount: 242,
       status: 'Success',
-      email: 'Abe45@gmail.com',
+      email: 'Abe45@gmail.com'
     },
     {
       id: 'derv1ws0',
       amount: 837,
       status: 'Processing',
-      email: 'Monserrat44@gmail.com',
+      email: 'Monserrat44@gmail.com'
     },
     {
       id: '5kma53ae',
       amount: 874,
       status: 'Success',
-      email: 'Silas22@gmail.com',
+      email: 'Silas22@gmail.com'
     },
     {
       id: 'bhqecj4p',
       amount: 721,
       status: 'Failed',
-      email: 'carmella@hotmail.com',
-    },
+      email: 'carmella@hotmail.com'
+    }
   ];
 
   const table = createTable(readable(data), {
     sort: addSortBy({ disableMultiSort: true }),
     page: addPagination(),
     filter: addTableFilter({
-      fn: ({ filterValue, value }) => value.includes(filterValue),
+      fn: ({ filterValue, value }) => value.includes(filterValue)
     }),
     select: addSelectedRows(),
-    hide: addHiddenColumns(),
+    hide: addHiddenColumns()
   });
 
   const columns = table.createColumns([
@@ -82,7 +81,7 @@
       header: (_, { pluginStates }) => {
         const { allPageRowsSelected } = pluginStates.select;
         return createRender(DataTableCheckbox, {
-          checked: allPageRowsSelected,
+          checked: allPageRowsSelected
         });
       },
       accessor: 'id',
@@ -91,22 +90,22 @@
         const { isSelected } = getRowState(row);
 
         return createRender(DataTableCheckbox, {
-          checked: isSelected,
+          checked: isSelected
         });
       },
       plugins: {
         sort: {
-          disable: true,
+          disable: true
         },
         filter: {
-          exclude: true,
-        },
-      },
+          exclude: true
+        }
+      }
     }),
     table.column({
       header: 'Status',
       accessor: 'status',
-      plugins: { sort: { disable: true }, filter: { exclude: true } },
+      plugins: { sort: { disable: true }, filter: { exclude: true } }
     }),
     table.column({
       header: 'Email',
@@ -116,9 +115,9 @@
         filter: {
           getFilterValue(value) {
             return value.toLowerCase();
-          },
-        },
-      },
+          }
+        }
+      }
     }),
     table.column({
       header: 'Amount',
@@ -126,18 +125,18 @@
       cell: ({ value }) => {
         const formatted = new Intl.NumberFormat('en-US', {
           style: 'currency',
-          currency: 'USD',
+          currency: 'USD'
         }).format(value);
         return formatted;
       },
       plugins: {
         sort: {
-          disable: true,
+          disable: true
         },
         filter: {
-          exclude: true,
-        },
-      },
+          exclude: true
+        }
+      }
     }),
     table.column({
       header: '',
@@ -147,21 +146,14 @@
       },
       plugins: {
         sort: {
-          disable: true,
-        },
-      },
-    }),
+          disable: true
+        }
+      }
+    })
   ]);
 
-  const {
-    headerRows,
-    pageRows,
-    tableAttrs,
-    tableBodyAttrs,
-    flatColumns,
-    pluginStates,
-    rows,
-  } = table.createViewModel(columns);
+  const { headerRows, pageRows, tableAttrs, tableBodyAttrs, flatColumns, pluginStates, rows } =
+    table.createViewModel(columns);
 
   const { sortKeys } = pluginStates.sort;
 
@@ -180,20 +172,22 @@
 
   const hideableCols = ['status', 'email', 'amount'];
 
-  // onMount(async () => {
-  //   const repositories = await getRepositories();
-  //   console.log(repositories);
-  // });
+  onMount(async () => {
+    try {
+      const response = await fetch('http://localhost:8000/api/repositories');
+      if (!response.ok) {
+        throw new Error('Failed to fetch repositories');
+      }
+      repositories = await response.json();
+    } catch (err: any) {
+      console.error(err);
+    }
+  });
 </script>
 
 <div class="w-full">
   <div class="flex items-center py-4">
-    <Input
-      class="max-w-sm"
-      placeholder="Filter emails..."
-      type="text"
-      bind:value={$filterValue}
-    />
+    <Input class="max-w-sm" placeholder="Filter emails..." type="text" bind:value={$filterValue} />
     <DropdownMenu.Root>
       <DropdownMenu.Trigger asChild let:builder>
         <Button variant="outline" class="ml-auto" builders={[builder]}>
@@ -218,16 +212,8 @@
           <Subscribe rowAttrs={headerRow.attrs()}>
             <Table.Row>
               {#each headerRow.cells as cell (cell.id)}
-                <Subscribe
-                  attrs={cell.attrs()}
-                  let:attrs
-                  props={cell.props()}
-                  let:props
-                >
-                  <Table.Head
-                    {...attrs}
-                    class={cn('[&:has([role=checkbox])]:pl-3')}
-                  >
+                <Subscribe attrs={cell.attrs()} let:attrs props={cell.props()} let:props>
+                  <Table.Head {...attrs} class={cn('[&:has([role=checkbox])]:pl-3')}>
                     {#if cell.id === 'amount'}
                       <div class="text-right font-medium">
                         <Render of={cell.render()} />
@@ -255,10 +241,7 @@
       <Table.Body {...$tableBodyAttrs}>
         {#each $pageRows as row (row.id)}
           <Subscribe rowAttrs={row.attrs()} let:rowAttrs>
-            <Table.Row
-              {...rowAttrs}
-              data-state={$selectedDataIds[row.id] && 'selected'}
-            >
+            <Table.Row {...rowAttrs} data-state={$selectedDataIds[row.id] && 'selected'}>
               {#each row.cells as cell (cell.id)}
                 <Subscribe attrs={cell.attrs()} let:attrs>
                   <Table.Cell class="[&:has([role=checkbox])]:pl-3" {...attrs}>
@@ -303,9 +286,7 @@
 
 <!-- Dialog Demo -->
 <Dialog.Root>
-  <Dialog.Trigger class={buttonVariants({ variant: 'outline' })}
-    >Edit Profile</Dialog.Trigger
-  >
+  <Dialog.Trigger class={buttonVariants({ variant: 'outline' })}>Edit Profile</Dialog.Trigger>
   <Dialog.Content class="sm:max-w-[425px]">
     <Dialog.Header>
       <Dialog.Title>Edit profile</Dialog.Title>
