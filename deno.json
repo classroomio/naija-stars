@@ -34,9 +34,9 @@
     "vite": "npm:vite@^6.0.1"
   },
   "deploy": {
-    "project": "0c35c570-b574-4fcc-ab58-81c72888063c",
+    "project": "",
     "exclude": ["**/node_modules"],
     "include": [],
-    "entrypoint": "main.ts"
+    "entrypoint": "server.ts"
   }
 }

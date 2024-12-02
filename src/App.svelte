@@ -23,6 +23,10 @@
       to: '/stats/forks',
     },
     {
+      label: 'Most popular license',
+      to: '/stats/license',
+    },
+    {
       label: 'Top 20 contributors',
       to: '/stats/contributors',
     },
