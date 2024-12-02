@@ -5,7 +5,8 @@
     "fe:preview": "deno run -A --node-modules-dir npm:vite preview",
     "fe:serve": "deno run --allow-net --allow-read jsr:@std/http@1/file-server dist/",
     "be:dev": "deno run --allow-all --watch --env-file server.ts",
-    "be:scrape": "deno run --allow-all --env-file utils/scrape/index.ts"
+    "be:scrape": "deno run --allow-all --env-file utils/scrape/index.ts",
+    "be:deploy": "deployctl deploy --env-file=.env --prod --project=naijastars-api --exclude=./node_modules --exclude=./dist --exclude=./src --exclude=./.vite main.ts"
   },
   "compilerOptions": {
     "lib": ["ES2020", "DOM", "DOM.Iterable"]
@@ -34,9 +35,15 @@
     "vite": "npm:vite@^6.0.1"
   },
   "deploy": {
-    "project": "",
-    "exclude": ["**/node_modules"],
+    "project": "c7d9d063-6f1a-4ca7-aafe-335f9ca26e97",
+    "exclude": [
+      "./node_modules",
+      "./dist",
+      "./src",
+      "./.vite",
+      "**/node_modules"
+    ],
     "include": [],
-    "entrypoint": "server.ts"
+    "entrypoint": "main.ts"
   }
 }
