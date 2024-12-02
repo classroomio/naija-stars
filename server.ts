@@ -1,6 +1,8 @@
 /// <reference lib="deno.ns" />
 import { Hono } from 'npm:hono';
 import { cors } from 'npm:hono/cors';
+import { cache } from 'npm:hono/cache';
+
 import RepositoryHandler from './routes/repository.ts';
 
 import 'jsr:@std/dotenv/load';
@@ -11,6 +13,15 @@ const app = new Hono();
 
 /** MIDDLEWARES */
 app.use('/api/*', cors());
+
+app.get(
+  '/api/*',
+  cache({
+    cacheName: 'naijastars-api',
+    cacheControl: 'max-age=3600',
+    wait: true,
+  })
+);
 
 /** ROUTES */
 // Root route

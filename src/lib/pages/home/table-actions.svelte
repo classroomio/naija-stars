@@ -3,7 +3,9 @@
   import * as DropdownMenu from '$lib/components/dropdown-menu';
   import { Button } from '$lib/components/button';
 
-  export let id: string;
+  import type { Repository } from '$lib/types/repository.ts';
+
+  export let data: Repository;
 </script>
 
 <DropdownMenu.Root>
@@ -21,8 +23,8 @@
   <DropdownMenu.Content>
     <DropdownMenu.Group>
       <DropdownMenu.Label>Actions</DropdownMenu.Label>
-      <DropdownMenu.Item on:click={() => navigator.clipboard.writeText(id)}>
-        Copy payment ID
+      <DropdownMenu.Item on:click={() => console.log(data)}>
+        Open Repository
       </DropdownMenu.Item>
     </DropdownMenu.Group>
     <DropdownMenu.Separator />

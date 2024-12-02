@@ -4,10 +4,10 @@ import { sql } from '../services/db.ts';
 
 const app = new Hono();
 
-const LIMIT_PER_PAGE = 10;
+const LIMIT_PER_PAGE = 5;
 
 // Valid sort columns and orders
-const VALID_SORT_COLUMNS = ['stars', 'repo_author'] as const;
+const VALID_SORT_COLUMNS = ['stars', 'author'] as const;
 const VALID_SORT_ORDERS = ['asc', 'desc'] as const;
 
 // Zod schema for query parameters
@@ -19,6 +19,8 @@ const querySchema = z.object({
 });
 
 app.get('/repositories', async (c) => {
+  console.log('Fetching repositories');
+
   try {
     // Validate query parameters
     const result = querySchema.safeParse({
@@ -40,7 +42,7 @@ app.get('/repositories', async (c) => {
 
     // Get total count for pagination metadata
     const countResult =
-      (await sql`SELECT COUNT(*)::INT as count FROM repositories;`) as {
+      (await sql`SELECT COUNT(*)::INT as count FROM repository;`) as {
         count: number;
       }[];
 
@@ -48,21 +50,12 @@ app.get('/repositories', async (c) => {
 
     // Get paginated and sorted repositories
     const repositories = await sql`
-      SELECT
-        repo_name,
-        repo_link,
-        repo_description,
-        repo_author,
-        repo_author_link,
-        is_inactive,
-        is_archived,
-        stars
-      FROM repositories
+      SELECT * FROM repository
       ORDER BY
         CASE WHEN ${sortBy} = 'stars' AND ${order} = 'asc' THEN stars END ASC,
         CASE WHEN ${sortBy} = 'stars' AND ${order} = 'desc' THEN stars END DESC,
-        CASE WHEN ${sortBy} = 'repo_author' AND ${order} = 'asc' THEN repo_author END ASC,
-        CASE WHEN ${sortBy} = 'repo_author' AND ${order} = 'desc' THEN repo_author END DESC
+        CASE WHEN ${sortBy} = 'author' AND ${order} = 'asc' THEN author END ASC,
+        CASE WHEN ${sortBy} = 'author' AND ${order} = 'desc' THEN author END DESC
       LIMIT ${limit}
       OFFSET ${offset};
     `;

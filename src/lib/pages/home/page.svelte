@@ -1,311 +1,78 @@
 <script lang="ts">
-  import { Repository } from './../../../../utils/getData.ts';
-  import { readable } from 'svelte/store';
-  import { Render, Subscribe, createRender, createTable } from 'svelte-headless-table';
-  import {
-    addHiddenColumns,
-    addPagination,
-    addSelectedRows,
-    addSortBy,
-    addTableFilter
-  } from 'svelte-headless-table/plugins';
-  import ArrowUpDown from 'lucide-svelte/icons/arrow-up-down';
-  import ChevronDown from 'lucide-svelte/icons/chevron-down';
-  import Actions from './table-actions.svelte';
-  import DataTableCheckbox from './table-checkbox.svelte';
-  import * as Table from '$lib/components/table/index.js';
-  import { Button, buttonVariants } from '$lib/components/button/index.js';
-  import * as DropdownMenu from '$lib/components/dropdown-menu';
-  import { cn } from '$lib/utils';
-  import { Input } from '$lib/components/input';
-
-  // Dialog logic here
-  import * as Dialog from '$lib/components/dialog';
-  import { Label } from '$lib/components/label';
   import { onMount } from 'svelte';
 
-  type Payment = {
-    id: string;
-    amount: number;
-    status: 'Pending' | 'Processing' | 'Success' | 'Failed';
-    email: string;
-  };
+  import { API_BASE_URL } from '$lib/config';
+  import Table from './table.svelte';
+  import { Skeleton } from '$lib/components/skeleton';
+  import type { Repository, ApiMetadata } from '$lib/types/repository';
 
   let repositories: Repository[] = [];
-
-  const data: Payment[] = [
-    {
-      id: 'm5gr84i9',
-      amount: 316,
-      status: 'Success',
-      email: 'ken99@yahoo.com'
+  let apiMetadata: ApiMetadata = {
+    pagination: {
+      currentPage: 1,
+      totalPages: 25,
+      totalItems: 250,
+      itemsPerPage: 10,
+      hasNextPage: false,
+      hasPrevPage: false,
     },
-    {
-      id: '3u1reuv4',
-      amount: 242,
-      status: 'Success',
-      email: 'Abe45@gmail.com'
+    sort: {
+      sortBy: 'stars',
+      order: 'desc',
     },
-    {
-      id: 'derv1ws0',
-      amount: 837,
-      status: 'Processing',
-      email: 'Monserrat44@gmail.com'
-    },
-    {
-      id: '5kma53ae',
-      amount: 874,
-      status: 'Success',
-      email: 'Silas22@gmail.com'
-    },
-    {
-      id: 'bhqecj4p',
-      amount: 721,
-      status: 'Failed',
-      email: 'carmella@hotmail.com'
-    }
-  ];
+  };
 
-  const table = createTable(readable(data), {
-    sort: addSortBy({ disableMultiSort: true }),
-    page: addPagination(),
-    filter: addTableFilter({
-      fn: ({ filterValue, value }) => value.includes(filterValue)
-    }),
-    select: addSelectedRows(),
-    hide: addHiddenColumns()
-  });
+  let isFetching = false;
 
-  const columns = table.createColumns([
-    table.column({
-      header: (_, { pluginStates }) => {
-        const { allPageRowsSelected } = pluginStates.select;
-        return createRender(DataTableCheckbox, {
-          checked: allPageRowsSelected
-        });
-      },
-      accessor: 'id',
-      cell: ({ row }, { pluginStates }) => {
-        const { getRowState } = pluginStates.select;
-        const { isSelected } = getRowState(row);
+  async function fetchRepositories() {
+    isFetching = true;
 
-        return createRender(DataTableCheckbox, {
-          checked: isSelected
-        });
-      },
-      plugins: {
-        sort: {
-          disable: true
-        },
-        filter: {
-          exclude: true
-        }
-      }
-    }),
-    table.column({
-      header: 'Status',
-      accessor: 'status',
-      plugins: { sort: { disable: true }, filter: { exclude: true } }
-    }),
-    table.column({
-      header: 'Email',
-      accessor: 'email',
-      cell: ({ value }) => value.toLowerCase(),
-      plugins: {
-        filter: {
-          getFilterValue(value) {
-            return value.toLowerCase();
-          }
-        }
-      }
-    }),
-    table.column({
-      header: 'Amount',
-      accessor: 'amount',
-      cell: ({ value }) => {
-        const formatted = new Intl.NumberFormat('en-US', {
-          style: 'currency',
-          currency: 'USD'
-        }).format(value);
-        return formatted;
-      },
-      plugins: {
-        sort: {
-          disable: true
-        },
-        filter: {
-          exclude: true
-        }
-      }
-    }),
-    table.column({
-      header: '',
-      accessor: ({ id }) => id,
-      cell: (item) => {
-        return createRender(Actions, { id: item.value });
-      },
-      plugins: {
-        sort: {
-          disable: true
-        }
-      }
-    })
-  ]);
-
-  const { headerRows, pageRows, tableAttrs, tableBodyAttrs, flatColumns, pluginStates, rows } =
-    table.createViewModel(columns);
-
-  const { sortKeys } = pluginStates.sort;
-
-  const { hiddenColumnIds } = pluginStates.hide;
-  const ids = flatColumns.map((c) => c.id);
-  let hideForId = Object.fromEntries(ids.map((id) => [id, true]));
-
-  $: $hiddenColumnIds = Object.entries(hideForId)
-    .filter(([, hide]) => !hide)
-    .map(([id]) => id);
-
-  const { hasNextPage, hasPreviousPage, pageIndex } = pluginStates.page;
-  const { filterValue } = pluginStates.filter;
-
-  const { selectedDataIds } = pluginStates.select;
-
-  const hideableCols = ['status', 'email', 'amount'];
-
-  onMount(async () => {
     try {
-      const response = await fetch('http://localhost:8000/api/repositories');
+      const response = await fetch(`${API_BASE_URL}/repositories?limit=5`);
       if (!response.ok) {
         throw new Error('Failed to fetch repositories');
       }
-      repositories = await response.json();
+      const result = await response.json();
+
+      repositories = result.data;
+      apiMetadata = {
+        pagination: result.pagination,
+        sort: result.sort,
+      };
     } catch (err: any) {
       console.error(err);
     }
+
+    isFetching = false;
+  }
+
+  onMount(() => {
+    fetchRepositories();
   });
 </script>
 
-<div class="w-full">
-  <div class="flex items-center py-4">
-    <Input class="max-w-sm" placeholder="Filter emails..." type="text" bind:value={$filterValue} />
-    <DropdownMenu.Root>
-      <DropdownMenu.Trigger asChild let:builder>
-        <Button variant="outline" class="ml-auto" builders={[builder]}>
-          Columns <ChevronDown class="ml-2 h-4 w-4" />
-        </Button>
-      </DropdownMenu.Trigger>
-      <DropdownMenu.Content>
-        {#each flatColumns as col}
-          {#if hideableCols.includes(col.id)}
-            <DropdownMenu.CheckboxItem bind:checked={hideForId[col.id]}>
-              {col.header}
-            </DropdownMenu.CheckboxItem>
-          {/if}
-        {/each}
-      </DropdownMenu.Content>
-    </DropdownMenu.Root>
-  </div>
-  <div class="rounded-md border">
-    <Table.Root {...$tableAttrs}>
-      <Table.Header>
-        {#each $headerRows as headerRow}
-          <Subscribe rowAttrs={headerRow.attrs()}>
-            <Table.Row>
-              {#each headerRow.cells as cell (cell.id)}
-                <Subscribe attrs={cell.attrs()} let:attrs props={cell.props()} let:props>
-                  <Table.Head {...attrs} class={cn('[&:has([role=checkbox])]:pl-3')}>
-                    {#if cell.id === 'amount'}
-                      <div class="text-right font-medium">
-                        <Render of={cell.render()} />
-                      </div>
-                    {:else if cell.id === 'email'}
-                      <Button variant="ghost" on:click={props.sort.toggle}>
-                        <Render of={cell.render()} />
-                        <ArrowUpDown
-                          class={cn(
-                            $sortKeys[0]?.id === cell.id && 'text-foreground',
-                            'ml-2 h-4 w-4'
-                          )}
-                        />
-                      </Button>
-                    {:else}
-                      <Render of={cell.render()} />
-                    {/if}
-                  </Table.Head>
-                </Subscribe>
-              {/each}
-            </Table.Row>
-          </Subscribe>
-        {/each}
-      </Table.Header>
-      <Table.Body {...$tableBodyAttrs}>
-        {#each $pageRows as row (row.id)}
-          <Subscribe rowAttrs={row.attrs()} let:rowAttrs>
-            <Table.Row {...rowAttrs} data-state={$selectedDataIds[row.id] && 'selected'}>
-              {#each row.cells as cell (cell.id)}
-                <Subscribe attrs={cell.attrs()} let:attrs>
-                  <Table.Cell class="[&:has([role=checkbox])]:pl-3" {...attrs}>
-                    {#if cell.id === 'amount'}
-                      <div class="text-right font-medium">
-                        <Render of={cell.render()} />
-                      </div>
-                    {:else if cell.id === 'status'}
-                      <div class="capitalize">
-                        <Render of={cell.render()} />
-                      </div>
-                    {:else}
-                      <Render of={cell.render()} />
-                    {/if}
-                  </Table.Cell>
-                </Subscribe>
-              {/each}
-            </Table.Row>
-          </Subscribe>
-        {/each}
-      </Table.Body>
-    </Table.Root>
-  </div>
-  <div class="flex items-center justify-end space-x-2 py-4">
-    <div class="text-muted-foreground flex-1 text-sm">
-      {Object.keys($selectedDataIds).length} of {$rows.length} row(s) selected.
+<div class="mt-5 max-w-2xl mx-auto">
+  {#if isFetching}
+    <div class="rounded-md border w-full">
+      <div class="flex flex-col gap-4 p-4">
+        <Skeleton class="h-10 w-full" />
+        <Skeleton class="h-8 w-full" />
+        <Skeleton class="h-8 w-full" />
+        <Skeleton class="h-8 w-full" />
+        <Skeleton class="h-8 w-full" />
+        <Skeleton class="h-8 w-full" />
+      </div>
     </div>
-    <Button
-      variant="outline"
-      size="sm"
-      on:click={() => ($pageIndex = $pageIndex - 1)}
-      disabled={!$hasPreviousPage}>Previous</Button
-    >
-    <Button
-      variant="outline"
-      size="sm"
-      disabled={!$hasNextPage}
-      on:click={() => ($pageIndex = $pageIndex + 1)}>Next</Button
-    >
-  </div>
-</div>
 
-<!-- Dialog Demo -->
-<Dialog.Root>
-  <Dialog.Trigger class={buttonVariants({ variant: 'outline' })}>Edit Profile</Dialog.Trigger>
-  <Dialog.Content class="sm:max-w-[425px]">
-    <Dialog.Header>
-      <Dialog.Title>Edit profile</Dialog.Title>
-      <Dialog.Description>
-        Make changes to your profile here. Click save when you're done.
-      </Dialog.Description>
-    </Dialog.Header>
-    <div class="grid gap-4 py-4">
-      <div class="grid grid-cols-4 items-center gap-4">
-        <Label for="name" class="text-right">Name</Label>
-        <Input id="name" value="Pedro Duarte" class="col-span-3" />
-      </div>
-      <div class="grid grid-cols-4 items-center gap-4">
-        <Label for="username" class="text-right">Username</Label>
-        <Input id="username" value="@peduarte" class="col-span-3" />
-      </div>
+    <Skeleton class="h-10 w-full" />
+  {:else}
+    <div>
+      <h2
+        class="mt-5 scroll-m-20 border-b pb-4 text-3xl font-semibold tracking-tight transition-colors first:mt-0"
+      >
+        Open source projects in Nigeria
+      </h2>
     </div>
-    <Dialog.Footer>
-      <Button type="submit">Save changes</Button>
-    </Dialog.Footer>
-  </Dialog.Content>
-</Dialog.Root>
+    <Table data={repositories} {apiMetadata} />
+  {/if}
+</div>
