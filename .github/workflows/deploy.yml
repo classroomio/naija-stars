@@ -38,7 +38,7 @@ jobs:
         uses: denoland/deployctl@v1
         with:
           project: "naijastars"
-          entrypoint: "mod.ts"
+          entrypoint: "index.html"
           root: "dist"
           
           
