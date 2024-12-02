@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { onMount } from 'svelte';
   import { readable } from 'svelte/store';
   import {
     Render,
@@ -14,17 +15,19 @@
     addTableFilter,
   } from 'svelte-headless-table/plugins';
   import ArrowUpDown from 'lucide-svelte/icons/arrow-up-down';
+
+  import { cn } from '$lib/utils';
+  import { Input } from '$lib/components/input';
+  import type { Repository, ApiMetadata } from '$lib/types/repository';
+
   import Actions from './table-actions.svelte';
   import DataTableCheckbox from './table-checkbox.svelte';
   import * as Table from '$lib/components/table/index.js';
   import { Button } from '$lib/components/button/index.js';
-  import { cn } from '$lib/utils';
-  import { Input } from '$lib/components/input';
-
-  import type { Repository, ApiMetadata } from '$lib/types/repository';
 
   export let data: Repository[] = [];
   export let apiMetadata: ApiMetadata;
+  export let currentPage: number;
 
   const table = createTable(readable(data), {
     sort: addSortBy({ disableMultiSort: true }),
@@ -111,21 +114,20 @@
   } = table.createViewModel(columns);
 
   const { sortKeys } = pluginStates.sort;
-
   const { hiddenColumnIds } = pluginStates.hide;
   const ids = flatColumns.map((c) => c.id);
   let hideForId = Object.fromEntries(ids.map((id) => [id, true]));
+
+  const { filterValue } = pluginStates.filter;
+  const { selectedDataIds } = pluginStates.select;
 
   $: $hiddenColumnIds = Object.entries(hideForId)
     .filter(([, hide]) => !hide)
     .map(([id]) => id);
 
-  const { hasNextPage, hasPreviousPage, pageIndex } = pluginStates.page;
-  const { filterValue } = pluginStates.filter;
-
-  const { selectedDataIds } = pluginStates.select;
-
-  console.log('apiMetadata', apiMetadata);
+  onMount(() => {
+    currentPage = apiMetadata.pagination.currentPage;
+  });
 </script>
 
 <div class="w-full">
@@ -215,14 +217,18 @@
     <Button
       variant="outline"
       size="sm"
-      on:click={() => ($pageIndex = $pageIndex - 1)}
-      disabled={!$hasPreviousPage}>Previous</Button
+      on:click={() => {
+        currentPage = currentPage - 1;
+      }}
+      disabled={!apiMetadata.pagination.hasPrevPage}>Previous</Button
     >
     <Button
       variant="outline"
       size="sm"
-      disabled={!$hasNextPage}
-      on:click={() => ($pageIndex = $pageIndex + 1)}>Next</Button
+      disabled={!apiMetadata.pagination.hasNextPage}
+      on:click={() => {
+        currentPage = currentPage + 1;
+      }}>Next</Button
     >
   </div>
 </div>

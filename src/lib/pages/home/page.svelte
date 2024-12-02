@@ -21,14 +21,17 @@
       order: 'desc',
     },
   };
+  let currentPage: number;
 
   let isFetching = false;
 
-  async function fetchRepositories() {
+  async function fetchRepositories(currentPage: number = 1) {
     isFetching = true;
 
     try {
-      const response = await fetch(`${API_BASE_URL}/repositories?limit=5`);
+      const response = await fetch(
+        `${API_BASE_URL}/repositories?limit=5&?page=${currentPage}`
+      );
       if (!response.ok) {
         throw new Error('Failed to fetch repositories');
       }
@@ -46,8 +49,12 @@
     isFetching = false;
   }
 
+  $: if (currentPage) {
+    fetchRepositories(currentPage);
+  }
+
   onMount(() => {
-    fetchRepositories();
+    fetchRepositories(currentPage);
   });
 </script>
 
@@ -73,6 +80,6 @@
         Open source projects in Nigeria
       </h2>
     </div>
-    <Table data={repositories} {apiMetadata} />
+    <Table data={repositories} {apiMetadata} bind:currentPage />
   {/if}
 </div>
