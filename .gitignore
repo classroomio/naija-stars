@@ -1,0 +1,30 @@
+node_modules
+.prettierrc
+.env
+
+# Deno specific
+.deno/
+deno.lock
+
+# Vite specific
+dist/
+.vite/
+
+# Environment
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Editor directories and files
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# OS specific
+.DS_Store
+Thumbs.db

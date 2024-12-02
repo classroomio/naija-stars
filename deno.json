@@ -1,17 +1,42 @@
 {
   "tasks": {
-    "dev": "deno run --watch main.ts"
+    "fe:dev": "deno run -A --node-modules-dir npm:vite",
+    "fe:build": "deno run -A --node-modules-dir npm:vite build",
+    "fe:preview": "deno run -A --node-modules-dir npm:vite preview",
+    "fe:serve": "deno run --allow-net --allow-read jsr:@std/http@1/file-server dist/",
+    "be:dev": "deno run --allow-all --watch --env-file server.ts",
+    "be:scrape": "deno run --allow-all --env-file utils/scrape/index.ts"
+  },
+  "compilerOptions": {
+    "lib": ["ES2020", "DOM", "DOM.Iterable"]
   },
   "imports": {
     "@b-fuze/deno-dom": "jsr:@b-fuze/deno-dom@^0.1.48",
-    "@ptm/mm-mark": "jsr:@ptm/mm-mark@^0.2.22"
+    "@deno/vite-plugin": "npm:@deno/vite-plugin@^1.0.1",
+    "@hono-rate-limiter/cloudflare": "npm:@hono-rate-limiter/cloudflare@^0.2.1",
+    "@neon/serverless": "jsr:@neon/serverless@^0.10.4",
+    "@ptm/mm-mark": "jsr:@ptm/mm-mark@^0.2.22",
+    "@std/dotenv": "jsr:@std/dotenv@^0.225.2",
+    "@sveltejs/vite-plugin-svelte": "npm:@sveltejs/vite-plugin-svelte@^5.0.1",
+    "autoprefixer": "npm:autoprefixer@^10.4.20",
+    "bits-ui": "npm:bits-ui@^0.21.16",
+    "clsx": "npm:clsx@^2.1.1",
+    "lucide-svelte": "npm:lucide-svelte@^0.462.0",
+    "mode-watcher": "npm:mode-watcher@^0.5.0",
+    "postcss": "npm:postcss@^8.4.49",
+    "shadcn-svelte": "npm:shadcn-svelte@^0.14.0",
+    "svelte": "npm:svelte@^5.2.9",
+    "svelte-headless-table": "npm:svelte-headless-table@^0.18.3",
+    "svelte-routing": "npm:svelte-routing@^2.13.0",
+    "tailwind-merge": "npm:tailwind-merge@^2.5.5",
+    "tailwind-variants": "npm:tailwind-variants@^0.3.0",
+    "tailwindcss": "npm:tailwindcss@^3.4.15",
+    "vite": "npm:vite@^6.0.1"
   },
   "deploy": {
-    "project": "0c35c570-b574-4fcc-ab58-81c72888063c",
-    "exclude": [
-      "**/node_modules"
-    ],
+    "project": "",
+    "exclude": ["**/node_modules"],
     "include": [],
-    "entrypoint": "main.ts"
+    "entrypoint": "server.ts"
   }
 }
