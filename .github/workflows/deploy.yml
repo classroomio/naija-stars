@@ -31,14 +31,11 @@ jobs:
       - name: Install step
         run: "deno install"
 
-      - name: Build step
-        run: "deno task fe:build"
-
       - name: Upload to Deno Deploy
         uses: denoland/deployctl@v1
         with:
-          project: "naijastars"
-          entrypoint: "https://deno.land/std@0.217.0/http/file_server.ts"
-          root: "dist"
+          project: "naijastars-api"
+          entrypoint: "server.ts"
+          root: ""
           
           
