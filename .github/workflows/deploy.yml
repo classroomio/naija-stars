@@ -9,6 +9,8 @@ jobs:
   deploy:
     name: Deploy
     runs-on: ubuntu-latest
+    env:
+      VITE_API_URL: https://naijastars-api.classroomio.com
 
     permissions:
       id-token: write # Needed for auth with Deno Deploy

@@ -28,6 +28,7 @@
     isFetching = true;
 
     try {
+      console.log('API_BASE_URL', API_BASE_URL);
       const response = await fetch(`${API_BASE_URL}/repositories?limit=5`);
       if (!response.ok) {
         throw new Error('Failed to fetch repositories');
