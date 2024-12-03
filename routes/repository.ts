@@ -7,7 +7,7 @@ const app = new Hono();
 const LIMIT_PER_PAGE = 10;
 
 // Valid sort columns and orders
-const VALID_SORT_COLUMNS = ['stars', 'author'] as const;
+const VALID_SORT_COLUMNS = ['stars', 'author', 'forks'] as const;
 const VALID_SORT_ORDERS = ['asc', 'desc'] as const;
 
 // Zod schema for query parameters
