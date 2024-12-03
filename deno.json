@@ -6,7 +6,7 @@
     "fe:serve": "deno run --allow-net --allow-read jsr:@std/http@1/file-server dist/",
     "be:dev": "deno run --allow-all --watch --env-file server.ts",
     "be:scrape": "deno run --allow-all --env-file utils/scrape/index.ts",
-    "be:deploy": "deployctl deploy --env-file=.env --prod --project=naijastars-api --exclude=./node_modules --exclude=./dist --exclude=./src --exclude=./.vite main.ts"
+    "be:deploy": "deployctl deploy --prod --env-file=.env --project=naijastars-api --exclude=./node_modules --exclude=./dist --exclude=./src --exclude=./.vite main.ts"
   },
   "compilerOptions": {
     "lib": ["ES2020", "DOM", "DOM.Iterable"]
