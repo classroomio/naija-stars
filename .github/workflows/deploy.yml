@@ -1,4 +1,4 @@
-name: Deploy
+name: Deploy Apps
 on:
   push:
     branches: main
@@ -6,11 +6,11 @@ on:
     branches: main
 
 jobs:
-  deploy:
-    name: Deploy
+  deploy_fe:
+    name: Deploy Frontend
     runs-on: ubuntu-latest
     env:
-      VITE_API_URL: https://naijastars-api.classroomio.com/api
+      VITE_API_URL: https://api.naijastars.dev/v1
 
     permissions:
       id-token: write # Needed for auth with Deno Deploy
@@ -40,5 +40,46 @@ jobs:
         uses: denoland/deployctl@v1
         with:
           project: 'naijastars'
-          entrypoint: 'https://deno.land/std@0.217.0/http/file_server.ts'
-          root: 'dist'
+          entrypoint: 'vite_server.ts'
+          root: '.'
+
+  deploy_api:
+    name: Deploy API
+    runs-on: ubuntu-latest
+    env:
+      NODE_ENV: 'production'
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      GITHUB_TOKEN: ${{ secrets.API_GITHUB_TOKEN }}
+      UPSTASH_REDIS_REST_URL: ${{ secrets.UPSTASH_REDIS_REST_URL }}
+      UPSTASH_REDIS_REST_TOKEN: ${{ secrets.UPSTASH_REDIS_REST_TOKEN }}
+
+    permissions:
+      id-token: write # Needed for auth with Deno Deploy
+      contents: read # Needed to clone the repository
+
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v4
+
+      - name: Install Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+
+      - name: Install step
+        run: 'deno install'
+
+      - name: Build step
+        run: 'deno task fe:build'
+
+      - name: Upload to Deno Deploy
+        uses: denoland/deployctl@v1
+        with:
+          project: 'naijastars-api'
+          entrypoint: 'main.ts'
+          root: '.'

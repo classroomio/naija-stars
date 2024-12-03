@@ -2,6 +2,9 @@
 import { Hono } from 'npm:hono';
 import { cors } from 'npm:hono/cors';
 import { cache } from 'npm:hono/cache';
+import { rateLimiter } from 'npm:hono-rate-limiter';
+import { Redis } from '@upstash/redis';
+import { RedisStore } from '@hono-rate-limiter/redis';
 
 import RepositoryHandler from './routes/repository.ts';
 
@@ -12,10 +15,29 @@ const PORT = Number(Deno.env.get('PORT')) || 8000;
 const app = new Hono();
 
 /** MIDDLEWARES */
-app.use('/api/*', cors());
+if (Deno.env.get('NODE_ENV') === 'production') {
+  console.log('Rate limiting enabled');
+
+  const redis = new Redis({
+    url: Deno.env.get('UPSTASH_REDIS_REST_URL'),
+    token: Deno.env.get('UPSTASH_REDIS_REST_TOKEN'),
+  });
+
+  const limiter = rateLimiter({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    limit: 5, // Limit each IP to 50 requests per `window` (here, per 15 minutes).
+    standardHeaders: 'draft-6', // draft-6: `RateLimit-*` headers; draft-7: combined `RateLimit` header
+    keyGenerator: (c) => c.req.header('cf-connecting-ip') ?? '', // Method to generate custom identifiers for clients.
+    store: new RedisStore({ client: redis }),
+  });
+
+  app.use(limiter);
+}
+
+app.use('/v1/*', cors());
 
 app.get(
-  '/api/*',
+  '/v1/*',
   cache({
     cacheName: 'naijastars-api',
     cacheControl: 'max-age=3600',
@@ -32,7 +54,7 @@ app.get('/', (c) => {
 });
 
 // Repository routes
-app.route('/api', RepositoryHandler);
+app.route('/v1', RepositoryHandler);
 
 /** START THE SERVER */
 console.log(`API server running on http://localhost:${PORT}`);
