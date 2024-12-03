@@ -1,6 +1,9 @@
 export interface ScrapedRepository {
   name: string;
   link: string;
+
+  author: string;
+  authorLink: string;
 }
 
 export interface DBRepository {
@@ -10,6 +13,9 @@ export interface DBRepository {
   author: string;
   author_link: string;
   author_avatar: string;
+
+  author_madeinnigeria: string;
+  author_link_madeinnigeria: string;
 
   stars: number;
   topics: string[];

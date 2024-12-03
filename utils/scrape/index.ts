@@ -47,6 +47,11 @@ const fetchDataFromGithub = async (
         description: apiData.description || '',
         author: apiData.owner.login,
         author_link: apiData.owner.html_url,
+
+        // Let's store the author's name and link from the scraped data
+        author_madeinnigeria: repository.author,
+        author_link_madeinnigeria: repository.authorLink,
+
         author_avatar: apiData.owner.avatar_url,
         stars: apiData.watchers_count || 0,
         topics: apiData.topics || [],
@@ -80,9 +85,15 @@ function convertToJSON(repositories: string[]): ScrapedRepository[] {
     const name = doc.querySelector('a')?.textContent?.trim() || '';
     const link = doc.querySelector('a')?.getAttribute('href') || '';
 
+    const author = doc.querySelector('strong a')?.textContent?.trim() || '';
+    const authorLink =
+      doc.querySelector('strong a')?.getAttribute('href') || '';
+
     return {
       name,
       link,
+      author,
+      authorLink,
     };
   });
 }
@@ -133,7 +144,9 @@ const getData = async () => {
         archived,
         disabled,
         original_created_at,
-        original_updated_at
+        original_updated_at,
+        author_madeinnigeria,
+        author_link_madeinnigeria
       ) VALUES (
         ${repo.name},
         ${repo.link},
@@ -149,11 +162,15 @@ const getData = async () => {
         ${repo.archived},
         ${repo.disabled},
         ${repo.original_created_at},
-        ${repo.original_updated_at}
+        ${repo.original_updated_at},
+        ${repo.author_madeinnigeria},
+        ${repo.author_link_madeinnigeria}
       )
       ON CONFLICT (link) DO UPDATE
       SET
         stars = EXCLUDED.stars,
+        author_madeinnigeria = EXCLUDED.author_madeinnigeria,
+        author_link_madeinnigeria = EXCLUDED.author_link_madeinnigeria,
         forks = EXCLUDED.forks,
         open_issues_count = EXCLUDED.open_issues_count,
         original_updated_at = EXCLUDED.original_updated_at,
