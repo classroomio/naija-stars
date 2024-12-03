@@ -54,6 +54,8 @@ app.get('/repositories', async (c) => {
       ORDER BY
         CASE WHEN ${sortBy} = 'stars' AND ${order} = 'asc' THEN stars END ASC,
         CASE WHEN ${sortBy} = 'stars' AND ${order} = 'desc' THEN stars END DESC,
+        CASE WHEN ${sortBy} = 'forks' AND ${order} = 'asc' THEN forks END ASC,
+        CASE WHEN ${sortBy} = 'forks' AND ${order} = 'desc' THEN forks END DESC,
         CASE WHEN ${sortBy} = 'author' AND ${order} = 'asc' THEN author END ASC,
         CASE WHEN ${sortBy} = 'author' AND ${order} = 'desc' THEN author END DESC
       LIMIT ${limit}
