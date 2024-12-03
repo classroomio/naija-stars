@@ -236,9 +236,6 @@
                         />
                       </a>
                     {:else if cell.id === 'author_avatar'}
-                      <!-- <div class="capitalize">
-                        <Render of={cell.render()} />
-                      </div> -->
                       <div class="w-[30px]">
                         <img
                           src={`${cell.render()}`}

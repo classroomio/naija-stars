@@ -1,4 +1,5 @@
 <script>
+  import { Link } from 'svelte-routing';
   import Sun from 'lucide-svelte/icons/sun';
   import Moon from 'lucide-svelte/icons/moon';
   import ArrowUpRight from 'lucide-svelte/icons/arrow-up-right';
@@ -59,8 +60,16 @@
   </p>
   <div class="container flex h-14 max-w-screen-2xl items-center">
     <div class="mr-4 hidden md:flex">
-      <a href="/" class="mr-6 flex items-center space-x-2">
+      <a href="/" class="mr-6 flex items-center space-x-4">
         <img src={logo192} alt="Naija Stars" class="h-8 w-8" />
+
+        <Link
+          to={'/docs'}
+          class="transition-colors text-foreground/50 hover:underline cursor-pointer"
+          let:active
+        >
+          <span class={active ? 'text-foreground/90' : ''}> Docs </span>
+        </Link>
 
         <span class="hidden font-bold xl:inline-block">Naija Stars</span>
       </a>
