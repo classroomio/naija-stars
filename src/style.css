@@ -89,13 +89,13 @@
 }
 
 .pre code {
-  white-space: pre-wrap; 
-  word-wrap: break-word; 
+  white-space: pre-wrap;
+  word-wrap: break-word;
   font-family: monospace;
 }
 
 .bg-black pre {
   max-width: 100%;
-  overflow-x: auto; 
-  padding: 1rem; 
+  overflow-x: auto;
+  padding: 1rem;
 }

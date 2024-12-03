@@ -1,5 +1,7 @@
-<section class="flex item-start gap-5 p-5">
-  <section class="w-2/4">
+<section
+  class="border w-full rounded-md flex flex-col md:flex-row item-start gap-5 p-5 h-[80vh] overflow-hidden overflow-y-auto"
+>
+  <section class="md:w-2/4 w-full">
     <h1 class="text-xl">Get Repositories</h1>
     <p class="text-sm mt-1">Get Repositories from the database</p>
 
@@ -13,42 +15,68 @@
 
     <div class="≈p-2.5 mt-10 text-sm">
       <div class="flex items-center gap-5 mb-4">
-        <p>Page</p>
+        <p>page</p>
         <p class="text-xs px-2 py-0.5 bg-red-50 text-black rounded-md">number</p>
       </div>
 
-      <p>Page number of repository</p>
+      <p>Page number of repository e.g. 1 | 2 | 3</p>
     </div>
 
     <div class="≈p-2.5 mt-10 text-sm">
       <div class="flex items-center gap-5 mb-4">
-        <p>Limit</p>
+        <p>limit</p>
         <p class="text-xs px-2 py-0.5 bg-red-50 text-black rounded-md">number</p>
       </div>
 
-      <p>Limit per page</p>
+      <p>Limit per page e.g. 10</p>
     </div>
 
     <div class="≈p-2.5 mt-10 text-sm">
       <div class="flex items-center gap-5 mb-4">
-        <p>SortBy</p>
+        <p>sortBy</p>
         <p class="text-xs px-2 py-0.5 bg-red-50 text-black rounded-md">string</p>
       </div>
 
-      <p>Sort by stars | forks</p>
+      <p>Sort by stars e.g. stars | author | forks</p>
     </div>
 
     <div class="≈p-2.5 mt-10 text-sm">
       <div class="flex items-center gap-5 mb-4">
-        <p>Order</p>
+        <p>order</p>
         <p class="text-xs px-2 py-0.5 bg-red-50 text-black rounded-md">string</p>
       </div>
 
-      <p>Order of sorting. asc | desc</p>
+      <p>Order of sorting e.g. asc | desc</p>
+    </div>
+    <div class="≈p-2.5 mt-10 text-sm">
+      <div class="flex items-center gap-5 mb-4">
+        <p>limit</p>
+        <p class="text-xs px-2 py-0.5 bg-red-50 text-black rounded-md">number</p>
+      </div>
+
+      <p>Limit per page e.g. 10</p>
+    </div>
+
+    <div class="≈p-2.5 mt-10 text-sm">
+      <div class="flex items-center gap-5 mb-4">
+        <p>sortBy</p>
+        <p class="text-xs px-2 py-0.5 bg-red-50 text-black rounded-md">string</p>
+      </div>
+
+      <p>Sort by stars e.g. stars | author | forks</p>
+    </div>
+
+    <div class="≈p-2.5 mt-10 text-sm">
+      <div class="flex items-center gap-5 mb-4">
+        <p>order</p>
+        <p class="text-xs px-2 py-0.5 bg-red-50 text-black rounded-md">string</p>
+      </div>
+
+      <p>Order of sorting e.g. asc | desc</p>
     </div>
   </section>
 
-  <section class="w-2/4 flex flex-col gap-5">
+  <section class="md:w-2/4 w-full flex flex-col gap-5">
     <div
       class="flex flex-col gap-3 bg-black dark:bg-transparent dark:border text-white rounded-md h-auto p-4 text-xs"
     >
@@ -57,7 +85,7 @@
     </div>
 
     <div
-      class="bg-black dark:bg-transparent dark:border text-white rounded-md h-[70%] overflow-auto"
+      class="bg-black dark:bg-transparent dark:border text-white rounded-md h-[90%] md:h-[80%] overflow-auto"
     >
       <pre>
         <code class="language-json text-xs">

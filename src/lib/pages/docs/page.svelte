@@ -10,57 +10,55 @@
 
   const navigation = [
     {
-      label: 'get'
+      label: 'get',
+      text: 'Get Repositories'
     },
     {
-      label: 'search'
+      label: 'search',
+      text: 'Search Repositories'
     }
   ];
 </script>
 
 <Router {url}>
-  <main class="p-5">
-    <div
-      class="flex-1 items-start md:grid md:grid-cols-[220px_minmax(0,1fr)] md:gap-6 lg:grid-cols-[100px_minmax(0,1fr)] lg:gap-10"
-    >
-      <aside
-        class="fixed top-14 z-30 -ml-2 hidden h-[calc(100vh-3.5rem)] w-full shrink-0 md:sticky md:block"
-      >
-        <div class="">
-          <button on:click={() => (state = '')}>Repositories</button>
-          <ul>
-            {#each navigation as nav}
-              <li class="py-1">
-                <button
-                  on:click={() => (state = nav.label)}
-                  class="px-2 py-1 text-xs rounded-sm {nav.label === 'get' &&
-                    'bg-green-900 text-green-400'} {nav.label === 'search' &&
-                    'bg-gray-900 text-white'}"
-                >
-                  <span class="uppercase">
-                    {nav.label}
-                  </span>
-                </button>
-              </li>
-            {/each}
-          </ul>
-        </div>
-      </aside>
+  <main
+    class="relative flex flex-col gap-y-5 w-full md:items-start md:grid md:grid-cols-[220px_minmax(0,1fr)] md:gap-6 lg:grid-cols-[280px_minmax(0,1fr)] lg:gap-10 md:h-[80vh] overflow-hidden overflow-y-auto"
+  >
+    <aside class="md:sticky top-0 z-30 h-full w-full shrink-0">
+      <button on:click={() => (state = '')} class="mb-3 p-2">Repositories</button>
 
-      <div class=" h-full">
-        {#if state === ''}
-          <section
-            class="flex flex-col justify-center items-center gap-5 rounded-md border h-[70%]"
+      <ul class="flex flex-col gap-1 mt-2">
+        {#each navigation as nav}
+          <button
+            on:click={() => (state = nav.label)}
+            class="p-2 flex items-center gap-5 rounded-md {state === nav.label && 'bg-gray-800'}"
           >
-            <h1 class="text-4xl">Welcome to Naija Stars Docs</h1>
-            <img src={logo} alt="logo" class="w-28 h-28" />
-          </section>
-        {:else if state === 'get'}
-          <GetPage />
-        {:else if state === 'search'}
-          <SearchPage />
-        {/if}
-      </div>
+            <span
+              class="px-2 py-1 text-xs rounded-sm uppercase w-[30%] {nav.label === 'get' &&
+                'bg-green-900 text-green-400'} {nav.label === 'search' && 'bg-gray-900 text-white'}"
+            >
+              {nav.label}
+            </span>
+
+            <span class="text-sm">{nav.text}</span>
+          </button>
+        {/each}
+      </ul>
+    </aside>
+
+    <div class="h-full">
+      {#if state === ''}
+        <section
+          class="flex flex-col justify-center items-center gap-5 rounded-md border h-[60vh] md:h-full p-5"
+        >
+          <h1 class="text-4xl text-center">Welcome to Naija Stars Docs</h1>
+          <img src={logo} alt="logo" class="w-28 h-28" />
+        </section>
+      {:else if state === 'get'}
+        <GetPage />
+      {:else if state === 'search'}
+        <SearchPage />
+      {/if}
     </div>
   </main>
 </Router>

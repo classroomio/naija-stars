@@ -1,5 +1,7 @@
-<section class="flex item-start gap-5 p-5">
-  <section class="w-2/4">
+<section
+  class="border rounded-md flex flex-col md:flex-row item-start gap-5 p-5 h-[80vh] overflow-hidden overflow-y-auto"
+>
+  <section class="md:w-2/4 w-full">
     <h1 class="text-xl">Search Repositories</h1>
     <p class="text-sm mt-1">Search for Repositories from the database</p>
 
@@ -21,7 +23,7 @@
     </div>
   </section>
 
-  <section class="w-2/4 flex flex-col gap-5">
+  <section class="md:w-2/4 w-full flex flex-col gap-5">
     <div
       class="flex flex-col gap-3 bg-black dark:bg-transparent dark:border text-white rounded-md h-auto p-4 text-xs"
     >
@@ -30,7 +32,7 @@
     </div>
 
     <div
-      class="bg-black dark:bg-transparent dark:border text-white rounded-md h-auto overflow-auto"
+      class="bg-black dark:bg-transparent dark:border text-white rounded-md h-[90%] overflow-auto"
     >
       <pre>
         <code class="language-json text-xs">
