@@ -22,15 +22,19 @@
     },
   };
   let currentPage: number;
+  let currentOrder: string;
 
   let isFetching = false;
 
-  async function fetchRepositories(currentPage: number = 1) {
+  async function fetchRepositories(
+    pageNumber: number = 1,
+    order: string = 'desc'
+  ) {
     isFetching = true;
 
     try {
       const response = await fetch(
-        `${API_BASE_URL}/repositories?limit=5&?page=${currentPage}`
+        `${API_BASE_URL}/repositories?limit=5&?page=${pageNumber}&?order=${order}`
       );
       if (!response.ok) {
         throw new Error('Failed to fetch repositories');
@@ -50,7 +54,7 @@
   }
 
   $: if (currentPage) {
-    fetchRepositories(currentPage);
+    fetchRepositories(currentPage, currentOrder);
   }
 
   onMount(() => {
@@ -80,6 +84,11 @@
         Open source projects in Nigeria
       </h2>
     </div>
-    <Table data={repositories} {apiMetadata} bind:currentPage />
+    <Table
+      data={repositories}
+      {apiMetadata}
+      bind:currentPage
+      bind:currentOrder
+    />
   {/if}
 </div>

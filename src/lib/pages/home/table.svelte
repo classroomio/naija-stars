@@ -28,6 +28,7 @@
   export let data: Repository[] = [];
   export let apiMetadata: ApiMetadata;
   export let currentPage: number;
+  export let currentOrder: string;
 
   const table = createTable(readable(data), {
     sort: addSortBy({ disableMultiSort: true }),
@@ -121,12 +122,38 @@
   const { filterValue } = pluginStates.filter;
   const { selectedDataIds } = pluginStates.select;
 
+  function previousPage() {
+    if (currentPage > 1) {
+      currentPage--;
+    }
+  }
+
+  function nextPage() {
+    if (apiMetadata.pagination.hasNextPage) {
+      currentPage++;
+    }
+  }
+
   $: $hiddenColumnIds = Object.entries(hideForId)
     .filter(([, hide]) => !hide)
     .map(([id]) => id);
 
+  $: {
+    if (typeof currentPage === 'number') {
+      const url = new URL(window.location.href);
+      url.searchParams.set('page', currentPage.toString());
+      history.replaceState(null, '', url.toString());
+    }
+  }
+
   onMount(() => {
-    currentPage = apiMetadata.pagination.currentPage;
+    const params = new URLSearchParams(window.location.search);
+    const pageParam = parseInt(params.get('page'), 10);
+    currentPage =
+      !isNaN(pageParam) && pageParam > 0
+        ? pageParam
+        : apiMetadata?.pagination?.currentPage || 1;
+    currentOrder = apiMetadata?.sort?.order || 'desc';
   });
 </script>
 
@@ -156,18 +183,18 @@
                     {...attrs}
                     class={cn('[&:has([role=checkbox])]:pl-3')}
                   >
-                    {#if cell.id === 'amount'}
-                      <div class="text-right font-medium">
-                        <Render of={cell.render()} />
-                      </div>
-                    {:else if cell.id === 'email'}
-                      <Button variant="ghost" on:click={props.sort.toggle}>
+                    {#if cell.id === 'stars'}
+                      <Button
+                        variant="ghost"
+                        class="pl-0 hover:bg-transparent"
+                        on:click={() =>
+                          (currentOrder =
+                            currentOrder === 'asc' ? 'desc' : 'asc')}
+                      >
                         <Render of={cell.render()} />
                         <ArrowUpDown
-                          class={cn(
-                            $sortKeys[0]?.id === cell.id && 'text-foreground',
-                            'ml-2 h-4 w-4'
-                          )}
+                          class="ml-2 h-4 w-4 {currentOrder === 'asc' &&
+                            'text-white'}"
                         />
                       </Button>
                     {:else}
@@ -217,18 +244,18 @@
     <Button
       variant="outline"
       size="sm"
-      on:click={() => {
-        currentPage = currentPage - 1;
-      }}
-      disabled={!apiMetadata.pagination.hasPrevPage}>Previous</Button
+      on:click={previousPage}
+      disabled={!apiMetadata.pagination.hasPrevPage}
     >
+      Previous
+    </Button>
     <Button
       variant="outline"
       size="sm"
+      on:click={nextPage}
       disabled={!apiMetadata.pagination.hasNextPage}
-      on:click={() => {
-        currentPage = currentPage + 1;
-      }}>Next</Button
     >
+      Next
+    </Button>
   </div>
 </div>
