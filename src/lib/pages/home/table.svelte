@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { onMount } from 'svelte';
   import { readable } from 'svelte/store';
   import {
     Render,
@@ -14,17 +15,25 @@
     addTableFilter,
   } from 'svelte-headless-table/plugins';
   import ArrowUpDown from 'lucide-svelte/icons/arrow-up-down';
+  import ArrowRight from 'lucide-svelte/icons/chevron-right';
+  import ArrowLeft from 'lucide-svelte/icons/chevron-left';
+
+  import { cn } from '$lib/utils';
+  import { Input } from '$lib/components/input';
+  import type { Repository, ApiMetadata } from '$lib/types/repository';
+
   import Actions from './table-actions.svelte';
   import DataTableCheckbox from './table-checkbox.svelte';
   import * as Table from '$lib/components/table/index.js';
   import { Button } from '$lib/components/button/index.js';
-  import { cn } from '$lib/utils';
-  import { Input } from '$lib/components/input';
-
-  import type { Repository, ApiMetadata } from '$lib/types/repository';
 
   export let data: Repository[] = [];
   export let apiMetadata: ApiMetadata;
+  export let currentPage: number;
+  export let currentOrder: string;
+  export let isFetching: boolean;
+
+  $: console.log('isFetching in table', isFetching);
 
   const table = createTable(readable(data), {
     sort: addSortBy({ disableMultiSort: true }),
@@ -110,22 +119,54 @@
     rows,
   } = table.createViewModel(columns);
 
-  const { sortKeys } = pluginStates.sort;
-
   const { hiddenColumnIds } = pluginStates.hide;
   const ids = flatColumns.map((c) => c.id);
   let hideForId = Object.fromEntries(ids.map((id) => [id, true]));
+
+  const { filterValue } = pluginStates.filter;
+  const { selectedDataIds } = pluginStates.select;
+
+  function previousPage() {
+    if (currentPage > 1) {
+      currentPage--;
+    }
+  }
+
+  function nextPage() {
+    if (apiMetadata.pagination.hasNextPage) {
+      currentPage++;
+    }
+  }
+
+  function onFirstPage() {
+    currentPage = 1;
+  }
+
+  function onLastPage() {
+    currentPage = apiMetadata.pagination.totalPages;
+  }
 
   $: $hiddenColumnIds = Object.entries(hideForId)
     .filter(([, hide]) => !hide)
     .map(([id]) => id);
 
-  const { hasNextPage, hasPreviousPage, pageIndex } = pluginStates.page;
-  const { filterValue } = pluginStates.filter;
+  $: {
+    if (typeof currentPage === 'number') {
+      const url = new URL(window.location.href);
+      url.searchParams.set('page', currentPage.toString());
+      history.replaceState(null, '', url.toString());
+    }
+  }
 
-  const { selectedDataIds } = pluginStates.select;
-
-  console.log('apiMetadata', apiMetadata);
+  onMount(() => {
+    const params = new URLSearchParams(window.location.search);
+    const pageParam = parseInt(params.get('page') || '1', 10);
+    currentPage =
+      !isNaN(pageParam) && pageParam > 0
+        ? pageParam
+        : apiMetadata?.pagination?.currentPage || 1;
+    currentOrder = apiMetadata?.sort?.order || 'desc';
+  });
 </script>
 
 <div class="w-full">
@@ -154,18 +195,18 @@
                     {...attrs}
                     class={cn('[&:has([role=checkbox])]:pl-3')}
                   >
-                    {#if cell.id === 'amount'}
-                      <div class="text-right font-medium">
-                        <Render of={cell.render()} />
-                      </div>
-                    {:else if cell.id === 'email'}
-                      <Button variant="ghost" on:click={props.sort.toggle}>
+                    {#if cell.id === 'stars'}
+                      <Button
+                        variant="ghost"
+                        class="pl-0 hover:bg-transparent"
+                        on:click={() =>
+                          (currentOrder =
+                            currentOrder === 'asc' ? 'desc' : 'asc')}
+                      >
                         <Render of={cell.render()} />
                         <ArrowUpDown
-                          class={cn(
-                            $sortKeys[0]?.id === cell.id && 'text-foreground',
-                            'ml-2 h-4 w-4'
-                          )}
+                          class="ml-2 h-4 w-4 {currentOrder === 'asc' &&
+                            'text-white'}"
                         />
                       </Button>
                     {:else}
@@ -210,19 +251,42 @@
   </div>
   <div class="flex items-center justify-end space-x-2 py-4">
     <div class="text-muted-foreground flex-1 text-sm">
-      {Object.keys($selectedDataIds).length} of {$rows.length} row(s) selected.
+      {$rows.length} repo(s) | Page {currentPage} of
+      {apiMetadata.pagination.totalPages}
     </div>
+
     <Button
       variant="outline"
       size="sm"
-      on:click={() => ($pageIndex = $pageIndex - 1)}
-      disabled={!$hasPreviousPage}>Previous</Button
+      on:click={onFirstPage}
+      disabled={currentPage === 1 || isFetching}
     >
+      First page
+    </Button>
+
     <Button
       variant="outline"
       size="sm"
-      disabled={!$hasNextPage}
-      on:click={() => ($pageIndex = $pageIndex + 1)}>Next</Button
+      on:click={previousPage}
+      disabled={!apiMetadata.pagination.hasPrevPage || isFetching}
     >
+      <ArrowLeft />
+    </Button>
+    <Button
+      variant="outline"
+      size="sm"
+      on:click={nextPage}
+      disabled={!apiMetadata.pagination.hasNextPage || isFetching}
+    >
+      <ArrowRight />
+    </Button>
+    <Button
+      variant="outline"
+      size="sm"
+      on:click={onLastPage}
+      disabled={currentPage === apiMetadata.pagination.totalPages || isFetching}
+    >
+      Last page
+    </Button>
   </div>
 </div>

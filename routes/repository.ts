@@ -4,7 +4,7 @@ import { sql } from '../services/db.ts';
 
 const app = new Hono();
 
-const LIMIT_PER_PAGE = 5;
+const LIMIT_PER_PAGE = 10;
 
 // Valid sort columns and orders
 const VALID_SORT_COLUMNS = ['stars', 'author'] as const;
