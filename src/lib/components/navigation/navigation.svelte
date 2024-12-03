@@ -63,6 +63,8 @@
       <a href="/" class="mr-6 flex items-center space-x-4">
         <img src={logo192} alt="Naija Stars" class="h-8 w-8" />
 
+        <span class="hidden font-bold xl:inline-block">Naija Stars</span>
+
         <Link
           to={'/docs'}
           class="transition-colors text-foreground/50 hover:underline cursor-pointer"
@@ -70,8 +72,6 @@
         >
           <span class={active ? 'text-foreground/90' : ''}> Docs </span>
         </Link>
-
-        <span class="hidden font-bold xl:inline-block">Naija Stars</span>
       </a>
       <!-- <nav class="flex items-center gap-3 text-sm">
         
