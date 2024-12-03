@@ -31,7 +31,8 @@
         {#each navigation as nav}
           <button
             on:click={() => (state = nav.label)}
-            class="p-2 flex items-center gap-5 rounded-md {state === nav.label && 'bg-gray-800'}"
+            class="p-2 flex items-center gap-5 rounded-md {state === nav.label &&
+              'dark:bg-gray-800 text-black border border-gray-900'}"
           >
             <span
               class="px-2 py-1 text-xs rounded-sm uppercase w-[30%] {nav.label === 'get' &&
