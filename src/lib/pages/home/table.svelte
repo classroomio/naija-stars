@@ -15,6 +15,8 @@
     addTableFilter,
   } from 'svelte-headless-table/plugins';
   import ArrowUpDown from 'lucide-svelte/icons/arrow-up-down';
+  import ArrowRight from 'lucide-svelte/icons/chevron-right';
+  import ArrowLeft from 'lucide-svelte/icons/chevron-left';
 
   import { cn } from '$lib/utils';
   import { Input } from '$lib/components/input';
@@ -29,6 +31,9 @@
   export let apiMetadata: ApiMetadata;
   export let currentPage: number;
   export let currentOrder: string;
+  export let isFetching: boolean;
+
+  $: console.log('isFetching in table', isFetching);
 
   const table = createTable(readable(data), {
     sort: addSortBy({ disableMultiSort: true }),
@@ -114,7 +119,6 @@
     rows,
   } = table.createViewModel(columns);
 
-  const { sortKeys } = pluginStates.sort;
   const { hiddenColumnIds } = pluginStates.hide;
   const ids = flatColumns.map((c) => c.id);
   let hideForId = Object.fromEntries(ids.map((id) => [id, true]));
@@ -134,6 +138,14 @@
     }
   }
 
+  function onFirstPage() {
+    currentPage = 1;
+  }
+
+  function onLastPage() {
+    currentPage = apiMetadata.pagination.totalPages;
+  }
+
   $: $hiddenColumnIds = Object.entries(hideForId)
     .filter(([, hide]) => !hide)
     .map(([id]) => id);
@@ -148,7 +160,7 @@
 
   onMount(() => {
     const params = new URLSearchParams(window.location.search);
-    const pageParam = parseInt(params.get('page'), 10);
+    const pageParam = parseInt(params.get('page') || '1', 10);
     currentPage =
       !isNaN(pageParam) && pageParam > 0
         ? pageParam
@@ -239,23 +251,42 @@
   </div>
   <div class="flex items-center justify-end space-x-2 py-4">
     <div class="text-muted-foreground flex-1 text-sm">
-      {Object.keys($selectedDataIds).length} of {$rows.length} row(s) selected.
+      {$rows.length} repo(s) | Page {currentPage} of
+      {apiMetadata.pagination.totalPages}
     </div>
+
+    <Button
+      variant="outline"
+      size="sm"
+      on:click={onFirstPage}
+      disabled={currentPage === 1 || isFetching}
+    >
+      First page
+    </Button>
+
     <Button
       variant="outline"
       size="sm"
       on:click={previousPage}
-      disabled={!apiMetadata.pagination.hasPrevPage}
+      disabled={!apiMetadata.pagination.hasPrevPage || isFetching}
     >
-      Previous
+      <ArrowLeft />
     </Button>
     <Button
       variant="outline"
       size="sm"
       on:click={nextPage}
-      disabled={!apiMetadata.pagination.hasNextPage}
+      disabled={!apiMetadata.pagination.hasNextPage || isFetching}
     >
-      Next
+      <ArrowRight />
+    </Button>
+    <Button
+      variant="outline"
+      size="sm"
+      on:click={onLastPage}
+      disabled={currentPage === apiMetadata.pagination.totalPages || isFetching}
+    >
+      Last page
     </Button>
   </div>
 </div>
