@@ -47,8 +47,11 @@ jobs:
     name: Deploy API
     runs-on: ubuntu-latest
     env:
+      NODE_ENV: 'production'
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
       GITHUB_TOKEN: ${{ secrets.API_GITHUB_TOKEN }}
+      UPSTASH_REDIS_REST_URL: ${{ secrets.UPSTASH_REDIS_REST_URL }}
+      UPSTASH_REDIS_REST_TOKEN: ${{ secrets.UPSTASH_REDIS_REST_TOKEN }}
 
     permissions:
       id-token: write # Needed for auth with Deno Deploy

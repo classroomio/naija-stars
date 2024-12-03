@@ -15,11 +15,15 @@
     "jsr:@std/path@~0.213.1": "0.213.1",
     "npm:@deno/vite-plugin@^1.0.1": "1.0.1_vite@5.4.11",
     "npm:@hono-rate-limiter/cloudflare@~0.2.1": "0.2.1_@cloudflare+workers-types@4.20241127.0_hono@4.6.5",
+    "npm:@hono-rate-limiter/redis@~0.1.4": "0.1.4_hono-rate-limiter@0.2.3__hono@4.6.5_hono@4.6.5",
     "npm:@sveltejs/vite-plugin-svelte@^5.0.1": "5.0.1_svelte@5.2.10__acorn@8.14.0_vite@6.0.1",
+    "npm:@types/node@*": "22.5.4",
     "npm:@types/pg@8.11.6": "8.11.6",
+    "npm:@upstash/redis@^1.34.3": "1.34.3",
     "npm:autoprefixer@^10.4.20": "10.4.20_postcss@8.4.49",
     "npm:bits-ui@~0.21.16": "0.21.16_svelte@5.2.10__acorn@8.14.0",
     "npm:clsx@^2.1.1": "2.1.1",
+    "npm:hono-rate-limiter@*": "0.2.3_hono@4.6.5",
     "npm:hono@*": "4.6.5",
     "npm:js-yaml@^4.0.9": "4.1.0",
     "npm:lucide-svelte@0.462": "0.462.0_svelte@5.2.10__acorn@8.14.0",
@@ -289,6 +293,12 @@
         "hono"
       ]
     },
+    "@hono-rate-limiter/redis@0.1.4_hono-rate-limiter@0.2.3__hono@4.6.5_hono@4.6.5": {
+      "integrity": "sha512-RSrVX5N2Oo/xXApskegu667cBVHyr8RXGWnbRDGjU2py8pN4BttEKSHA0iKi3BAwh1xSkENgDRng4tpFD9DbKg==",
+      "dependencies": [
+        "hono-rate-limiter"
+      ]
+    },
     "@internationalized/date@3.6.0": {
       "integrity": "sha512-+z6ti+CcJnRlLHok/emGEsWQhe7kfSmEW+/6qCzvKY67YPh7YOBfvc7+/+NXq+zJlbArg30tYpqLjNgcAYv2YQ==",
       "dependencies": [
@@ -490,6 +500,12 @@
         "pg-types"
       ]
     },
+    "@upstash/redis@1.34.3": {
+      "integrity": "sha512-VT25TyODGy/8ljl7GADnJoMmtmJ1F8d84UXfGonRRF8fWYJz7+2J6GzW+a6ETGtk4OyuRTt7FRSvFG5GvrfSdQ==",
+      "dependencies": [
+        "crypto-js"
+      ]
+    },
     "acorn-typescript@1.4.13_acorn@8.14.0": {
       "integrity": "sha512-xsc9Xv0xlVfwp2o7sQ+GCQ1PgbkdcpWdTzrwXxO3xDMTAywVS3oXVOcOHuRjAPkS4P9b+yc/qNF15460v+jp4Q==",
       "dependencies": [
@@ -644,6 +660,9 @@
         "shebang-command",
         "which"
       ]
+    },
+    "crypto-js@4.2.0": {
+      "integrity": "sha512-KALDyEYgpY+Rlob/iriUtjV6d5Eq+Y191A5g4UqLAi8CyGP9N1+FdVbkc1SxKc2r4YAYqG8JzO2KGL+AizD70Q=="
     },
     "css-tree@2.3.1": {
       "integrity": "sha512-6Fv1DV/TYw//QF5IzQdqsNDjx/wc8TrMBZsqjL9eW01tWb7R7k/mq+/VXfJCl7SoD5emsJop9cOByJZfs8hYIw==",
@@ -853,6 +872,12 @@
     },
     "he@1.2.0": {
       "integrity": "sha512-F/1DnUGPopORZi0ni+CvrCgHQ5FyEAHRLSApuYWMmrbSwoN2Mn/7k+Gl38gJnR7yyDZk6WLXwiGod1JOWNDKGw=="
+    },
+    "hono-rate-limiter@0.2.3_hono@4.6.5": {
+      "integrity": "sha512-/pQIJWMd8saoySMoM3rhHNiC3XtZuZDkxBvtnPmRKrpNBZIG38k0cs+nVmBW5pc8HAmkS+I/14rbHfRObekWmw==",
+      "dependencies": [
+        "hono"
+      ]
     },
     "hono@4.6.5": {
       "integrity": "sha512-qsmN3V5fgtwdKARGLgwwHvcdLKursMd+YOt69eGpl1dUCJb8mCd7hZfyZnBYjxCegBG7qkJRQRUy2oO25yHcyQ=="
@@ -1658,7 +1683,9 @@
       "jsr:@std/dotenv@~0.225.2",
       "npm:@deno/vite-plugin@^1.0.1",
       "npm:@hono-rate-limiter/cloudflare@~0.2.1",
+      "npm:@hono-rate-limiter/redis@~0.1.4",
       "npm:@sveltejs/vite-plugin-svelte@^5.0.1",
+      "npm:@upstash/redis@^1.34.3",
       "npm:autoprefixer@^10.4.20",
       "npm:bits-ui@~0.21.16",
       "npm:clsx@^2.1.1",

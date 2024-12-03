@@ -4,21 +4,24 @@
     "fe:build": "deno run -A --node-modules-dir npm:vite build",
     "fe:preview": "deno run -A --node-modules-dir npm:vite preview",
     "fe:serve": "deno run --allow-net --allow-read vite_server.ts",
-    "be:dev": "deno run --allow-all --watch --env-file server.ts",
+    "be:dev": "deno run --allow-all --watch --env-file main.ts",
     "be:scrape": "deno run --allow-all --env-file utils/scrape/index.ts",
     "be:deploy": "deployctl deploy --prod --env-file=.env --project=naijastars-api --exclude=./node_modules --exclude=./dist --exclude=./src --exclude=./.vite main.ts"
   },
   "compilerOptions": {
     "lib": ["ES2020", "DOM", "DOM.Iterable"]
   },
+  "nodeModulesDir": "auto",
   "imports": {
     "@b-fuze/deno-dom": "jsr:@b-fuze/deno-dom@^0.1.48",
     "@deno/vite-plugin": "npm:@deno/vite-plugin@^1.0.1",
     "@hono-rate-limiter/cloudflare": "npm:@hono-rate-limiter/cloudflare@^0.2.1",
+    "@hono-rate-limiter/redis": "npm:@hono-rate-limiter/redis@^0.1.4",
     "@neon/serverless": "jsr:@neon/serverless@^0.10.4",
     "@ptm/mm-mark": "jsr:@ptm/mm-mark@^0.2.22",
     "@std/dotenv": "jsr:@std/dotenv@^0.225.2",
     "@sveltejs/vite-plugin-svelte": "npm:@sveltejs/vite-plugin-svelte@^5.0.1",
+    "@upstash/redis": "npm:@upstash/redis@^1.34.3",
     "autoprefixer": "npm:autoprefixer@^10.4.20",
     "bits-ui": "npm:bits-ui@^0.21.16",
     "clsx": "npm:clsx@^2.1.1",
