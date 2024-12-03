@@ -41,7 +41,7 @@ jobs:
         with:
           project: 'naijastars'
           entrypoint: 'vite_server.ts'
-          root: 'dist'
+          root: '.'
 
   deploy_api:
     name: Deploy API
