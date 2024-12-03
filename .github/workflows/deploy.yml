@@ -10,7 +10,7 @@ jobs:
     name: Deploy Frontend
     runs-on: ubuntu-latest
     env:
-      VITE_API_URL: https://naijastars-api.classroomio.com/api
+      VITE_API_URL: https://api.naijastars.dev/v1
 
     permissions:
       id-token: write # Needed for auth with Deno Deploy

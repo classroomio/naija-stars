@@ -12,10 +12,10 @@ const PORT = Number(Deno.env.get('PORT')) || 8000;
 const app = new Hono();
 
 /** MIDDLEWARES */
-app.use('/api/*', cors());
+app.use('/v1/*', cors());
 
 app.get(
-  '/api/*',
+  '/v1/*',
   cache({
     cacheName: 'naijastars-api',
     cacheControl: 'max-age=3600',
@@ -32,7 +32,7 @@ app.get('/', (c) => {
 });
 
 // Repository routes
-app.route('/api', RepositoryHandler);
+app.route('/v1', RepositoryHandler);
 
 /** START THE SERVER */
 console.log(`API server running on http://localhost:${PORT}`);
