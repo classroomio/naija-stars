@@ -86,4 +86,41 @@ app.get('/repositories', async (c) => {
   }
 });
 
+app.get('/repositories/search', async (c) => {
+  console.log('Searching repositories');
+
+  try {
+    const text = c.req.query('text') || '';
+
+    if (!text) {
+      return c.json({ error: 'Search text is required' }, 400);
+    }
+
+    console.log('Received query parameters:', {
+      text: c.req.query('text'),
+      page: c.req.query('page'),
+      limit: c.req.query('limit'),
+    });
+
+    const repositories = await sql`
+      SELECT *
+      FROM repository
+      WHERE name ILIKE '%' || ${text} || '%'
+        OR author ILIKE '%' || ${text} || '%';
+    `;
+
+    return c.json({
+      data: repositories,
+      search: {
+        text,
+        totalItems: repositories.length,
+      },
+    });
+  } catch (error) {
+    console.error('Error searching Neon database:', error);
+    return c.json({ error: 'Failed to search repositories' }, 500);
+  }
+});
+
+
 export default app;

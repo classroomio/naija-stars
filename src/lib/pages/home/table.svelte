@@ -10,7 +10,6 @@
   import {
     addHiddenColumns,
     addPagination,
-    addSelectedRows,
     addSortBy,
     addTableFilter,
   } from 'svelte-headless-table/plugins';
@@ -23,7 +22,6 @@
   import type { Repository, ApiMetadata } from '$lib/types/repository';
 
   import Actions from './table-actions.svelte';
-  import DataTableCheckbox from './table-checkbox.svelte';
   import * as Table from '$lib/components/table/index.js';
   import { Button } from '$lib/components/button/index.js';
 
@@ -31,9 +29,22 @@
   export let apiMetadata: ApiMetadata;
   export let currentPage: number;
   export let currentOrder: string;
+  export let currentSortBy: string;
+  export let searchValue: string = '';
   export let isFetching: boolean;
 
-  $: console.log('isFetching in table', isFetching);
+  function extractLastSegment(url) {
+    if (typeof url !== 'string' || !url.includes('/')) {
+      return '';
+    }
+    return url.split('/').filter(Boolean).pop();
+  }
+
+  function handleSearchInput(event: Event) {
+    const input = event.target as HTMLInputElement;
+    searchValue = input.value;
+    filterValue.set(input.value);
+  }
 
   const table = createTable(readable(data), {
     sort: addSortBy({ disableMultiSort: true }),
@@ -41,52 +52,23 @@
     filter: addTableFilter({
       fn: ({ filterValue, value }) => value.includes(filterValue),
     }),
-    select: addSelectedRows(),
     hide: addHiddenColumns(),
   });
 
   const columns = table.createColumns([
     table.column({
-      header: (_, { pluginStates }) => {
-        const { allPageRowsSelected } = pluginStates.select;
-        return createRender(DataTableCheckbox, {
-          checked: allPageRowsSelected,
-        });
-      },
-      accessor: 'id',
-      cell: ({ row }, { pluginStates }) => {
-        const { getRowState } = pluginStates.select;
-        const { isSelected } = getRowState(row);
-
-        return createRender(DataTableCheckbox, {
-          checked: isSelected,
-        });
-      },
-      plugins: {
-        sort: {
-          disable: true,
-        },
-        filter: {
-          exclude: true,
-        },
-      },
+      header: 'Name',
+      accessor: 'link',
     }),
     table.column({
-      header: 'Name',
-      accessor: 'name',
-      plugins: { sort: { disable: true }, filter: { exclude: true } },
+      header: '',
+      accessor: 'author_avatar',
+      cell: ({ value }) => value.toLowerCase(),
     }),
     table.column({
       header: 'Author',
       accessor: 'author',
       cell: ({ value }) => value.toLowerCase(),
-      plugins: {
-        filter: {
-          getFilterValue(value) {
-            return value.toLowerCase();
-          },
-        },
-      },
     }),
     table.column({
       header: 'Stars',
@@ -96,15 +78,17 @@
       },
     }),
     table.column({
+      header: 'Forks',
+      accessor: 'forks',
+      cell: ({ value }) => {
+        return value;
+      },
+    }),
+    table.column({
       header: '',
       accessor: (data) => data,
       cell: (item) => {
         return createRender(Actions, { data: item.value });
-      },
-      plugins: {
-        sort: {
-          disable: true,
-        },
       },
     }),
   ]);
@@ -124,7 +108,6 @@
   let hideForId = Object.fromEntries(ids.map((id) => [id, true]));
 
   const { filterValue } = pluginStates.filter;
-  const { selectedDataIds } = pluginStates.select;
 
   function previousPage() {
     if (currentPage > 1) {
@@ -159,6 +142,7 @@
   }
 
   onMount(() => {
+    console.log(data);
     const params = new URLSearchParams(window.location.search);
     const pageParam = parseInt(params.get('page') || '1', 10);
     currentPage =
@@ -170,15 +154,16 @@
 </script>
 
 <div class="w-full">
-  <div class="hidden py-4">
-    <Input
-      class="max-w-sm"
-      placeholder="Filter emails..."
-      type="text"
-      bind:value={$filterValue}
-    />
-  </div>
   <div class="rounded-md my-4 border">
+    <div class="m-2">
+      <Input
+        placeholder="Filter repositories..."
+        type="text"
+        bind:value={$filterValue}
+        on:input={handleSearchInput}
+      />
+    </div>
+
     <Table.Root {...$tableAttrs}>
       <Table.Header>
         {#each $headerRows as headerRow}
@@ -195,18 +180,30 @@
                     {...attrs}
                     class={cn('[&:has([role=checkbox])]:pl-3')}
                   >
-                    {#if cell.id === 'stars'}
+                    {#if cell.id === 'stars' || cell.id === 'forks'}
                       <Button
                         variant="ghost"
                         class="pl-0 hover:bg-transparent"
-                        on:click={() =>
-                          (currentOrder =
-                            currentOrder === 'asc' ? 'desc' : 'asc')}
+                        on:click={() => {
+                          if (cell.id === 'stars') {
+                            currentSortBy = 'stars';
+                            currentOrder =
+                              currentOrder === 'asc' ? 'desc' : 'asc';
+                          }
+                          if (cell.id === 'forks') {
+                            currentSortBy = 'forks';
+                            currentOrder =
+                              currentOrder === 'asc' ? 'desc' : 'asc';
+                          }
+                        }}
                       >
                         <Render of={cell.render()} />
                         <ArrowUpDown
-                          class="ml-2 h-4 w-4 {currentOrder === 'asc' &&
-                            'text-white'}"
+                          class="ml-2 h-4 w-4 {currentSortBy === cell.id &&
+                            currentOrder === 'asc' &&
+                            'text-green-500'} {currentSortBy === cell.id &&
+                            currentOrder === 'desc' &&
+                            'text-red-500'}"
                         />
                       </Button>
                     {:else}
@@ -222,20 +219,32 @@
       <Table.Body {...$tableBodyAttrs}>
         {#each $pageRows as row (row.id)}
           <Subscribe rowAttrs={row.attrs()} let:rowAttrs>
-            <Table.Row
-              {...rowAttrs}
-              data-state={$selectedDataIds[row.id] && 'selected'}
-            >
+            <Table.Row {...rowAttrs}>
               {#each row.cells as cell (cell.id)}
                 <Subscribe attrs={cell.attrs()} let:attrs>
                   <Table.Cell class="[&:has([role=checkbox])]:pl-3" {...attrs}>
-                    {#if cell.id === 'amount'}
-                      <div class="text-right font-medium">
+                    {#if cell.id === 'link'}
+                      <!-- wrap it around the link of the repo -->
+                      <a
+                        href={`${cell.render()}`}
+                        class="text-right font-medium"
+                        target="_blank"
+                      >
+                        <Render
+                          of={extractLastSegment(cell.render() || '') ||
+                            'Unknown'}
+                        />
+                      </a>
+                    {:else if cell.id === 'author_avatar'}
+                      <!-- <div class="capitalize">
                         <Render of={cell.render()} />
-                      </div>
-                    {:else if cell.id === 'status'}
-                      <div class="capitalize">
-                        <Render of={cell.render()} />
+                      </div> -->
+                      <div class="w-[30px]">
+                        <img
+                          src={`${cell.render()}`}
+                          class="rounded-full"
+                          alt=""
+                        />
                       </div>
                     {:else}
                       <Render of={cell.render()} />

@@ -23,12 +23,18 @@
   };
   let currentPage: number;
   let currentOrder: string;
+  let currentSortBy: string;
+  let searchValue: string = '';
 
   let isFetching = false;
   let isMounted = false;
 
   const fetchRepositories = debounce(
-    async (pageNumber: number = 1, order: string = 'desc') => {
+    async (
+      pageNumber: number = 1,
+      order: string = 'desc',
+      sortBy: string = 'stars'
+    ) => {
       console.log('fetching repositories');
       isFetching = true;
 
@@ -37,6 +43,7 @@
         url.searchParams.set('limit', '10');
         url.searchParams.set('page', pageNumber.toString());
         url.searchParams.set('order', order);
+        url.searchParams.set('sortBy', sortBy);
 
         const response = await fetch(url);
 
@@ -63,7 +70,40 @@
     1000
   );
 
-  $: fetchRepositories(currentPage, currentOrder);
+  const searchRepositories = debounce(async (param = '') => {
+    console.log('fetching repositories');
+    isFetching = true;
+
+    try {
+      const url = new URL(`${API_BASE_URL}/repositories/search`);
+      url.searchParams.set('text', param);
+
+      const response = await fetch(url);
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch repositories');
+      }
+
+      const result = await response.json();
+      repositories = result.data;
+    } catch (err: any) {
+      console.error(err);
+    }
+
+    isFetching = false;
+
+    if (!isMounted) {
+      isMounted = true;
+    }
+  }, 1000);
+
+  $: {
+    if (searchValue !== '') {
+      searchRepositories(searchValue);
+    }
+  }
+
+  $: fetchRepositories(currentPage, currentOrder, currentSortBy);
 
   $: gettingFreshData = isFetching && isMounted;
 </script>
@@ -94,6 +134,8 @@
         {apiMetadata}
         bind:currentPage
         bind:currentOrder
+        bind:currentSortBy
+        bind:searchValue
         isFetching={gettingFreshData}
       />
     {/key}
