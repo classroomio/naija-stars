@@ -25,14 +25,14 @@
 
   <section class="md:w-2/4 w-full flex flex-col gap-5">
     <div
-      class="flex flex-col gap-3 bg-black dark:bg-transparent dark:border text-white rounded-md h-auto p-4 text-xs"
+      class="flex flex-col gap-3 bg-white dark:bg-transparent border dark:text-white rounded-md h-auto p-4 text-xs"
     >
       <p>curl --request GET \</p>
       <p>--url http://localhost:8000/api/repositories/search \</p>
     </div>
 
     <div
-      class="bg-black dark:bg-transparent dark:border text-white rounded-md h-[90%] overflow-auto"
+      class="bg-white dark:bg-transparent border dark:text-white rounded-md h-[90%] overflow-auto"
     >
       <pre>
         <code class="language-json text-xs">
