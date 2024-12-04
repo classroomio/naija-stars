@@ -57,7 +57,7 @@
 
       repositories = result.data.map((repo: Repository, index: number) => ({
         ...repo,
-        id: index + 1,
+        id: index + 1 + (page - 1) * 10,
       }));
       apiMetadata = {
         pagination: result.pagination,

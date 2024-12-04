@@ -56,7 +56,7 @@
         <section
           class="flex flex-col justify-center items-center gap-5 rounded-md border md:h-full p-5"
         >
-          <h1 class="text-4xl text-center">Welcome to Naija Stars Docs</h1>
+          <h1 class="text-4xl text-center">Welcome to Naija Stars API</h1>
           <img src={logo} alt="logo" class="w-28 h-28" />
         </section>
       {:else if state === 'get'}

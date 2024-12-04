@@ -66,11 +66,11 @@
         <span class="hidden font-bold xl:inline-block">Naija Stars</span>
 
         <Link
-          to={'/docs'}
+          to={'/api'}
           class="transition-colors text-foreground/50 hover:underline cursor-pointer"
           let:active
         >
-          <span class={active ? 'text-foreground/90' : ''}> Docs </span>
+          <span class={active ? 'text-foreground/90' : ''}> API </span>
         </Link>
       </a>
       <!-- <nav class="flex items-center gap-3 text-sm">
