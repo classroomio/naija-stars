@@ -1,16 +1,14 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
   import { readable } from 'svelte/store';
   import {
     Render,
     Subscribe,
-    createRender,
+    // createRender,
     createTable,
   } from 'svelte-headless-table';
   import {
     addHiddenColumns,
     addPagination,
-    addSelectedRows,
     addSortBy,
     addTableFilter,
   } from 'svelte-headless-table/plugins';
@@ -22,18 +20,28 @@
   import { Input } from '$lib/components/input';
   import type { Repository, ApiMetadata } from '$lib/types/repository';
 
-  import Actions from './table-actions.svelte';
-  import DataTableCheckbox from './table-checkbox.svelte';
+  // import Actions from './table-actions.svelte';
   import * as Table from '$lib/components/table/index.js';
   import { Button } from '$lib/components/button/index.js';
 
   export let data: Repository[] = [];
   export let apiMetadata: ApiMetadata;
-  export let currentPage: number;
-  export let currentOrder: string;
   export let isFetching: boolean;
+  export let searchValue: string;
+  export let onSearch: (value: string) => void;
 
-  $: console.log('isFetching in table', isFetching);
+  function extractLastSegment(url) {
+    if (typeof url !== 'string' || !url.includes('/')) {
+      return '';
+    }
+    return url.split('/').filter(Boolean).pop();
+  }
+
+  function handleSearchInput(event: Event) {
+    const input = event.target as HTMLInputElement;
+    searchValue = input.value;
+    onSearch(input.value);
+  }
 
   const table = createTable(readable(data), {
     sort: addSortBy({ disableMultiSort: true }),
@@ -41,52 +49,27 @@
     filter: addTableFilter({
       fn: ({ filterValue, value }) => value.includes(filterValue),
     }),
-    select: addSelectedRows(),
     hide: addHiddenColumns(),
   });
 
   const columns = table.createColumns([
     table.column({
-      header: (_, { pluginStates }) => {
-        const { allPageRowsSelected } = pluginStates.select;
-        return createRender(DataTableCheckbox, {
-          checked: allPageRowsSelected,
-        });
-      },
+      header: '#',
       accessor: 'id',
-      cell: ({ row }, { pluginStates }) => {
-        const { getRowState } = pluginStates.select;
-        const { isSelected } = getRowState(row);
-
-        return createRender(DataTableCheckbox, {
-          checked: isSelected,
-        });
-      },
-      plugins: {
-        sort: {
-          disable: true,
-        },
-        filter: {
-          exclude: true,
-        },
-      },
     }),
     table.column({
       header: 'Name',
-      accessor: 'name',
-      plugins: { sort: { disable: true }, filter: { exclude: true } },
+      accessor: 'link',
+    }),
+    table.column({
+      header: '',
+      accessor: 'author_avatar',
+      cell: ({ value }) => value.toLowerCase(),
     }),
     table.column({
       header: 'Author',
       accessor: 'author',
       cell: ({ value }) => value.toLowerCase(),
-      plugins: {
-        filter: {
-          getFilterValue(value) {
-            return value.toLowerCase();
-          },
-        },
-      },
     }),
     table.column({
       header: 'Stars',
@@ -96,17 +79,19 @@
       },
     }),
     table.column({
-      header: '',
-      accessor: (data) => data,
-      cell: (item) => {
-        return createRender(Actions, { data: item.value });
-      },
-      plugins: {
-        sort: {
-          disable: true,
-        },
+      header: 'Forks',
+      accessor: 'forks',
+      cell: ({ value }) => {
+        return value;
       },
     }),
+    // table.column({
+    //   header: '',
+    //   accessor: (data) => data,
+    //   cell: (item) => {
+    //     return createRender(Actions, { data: item.value });
+    //   },
+    // }),
   ]);
 
   const {
@@ -124,61 +109,61 @@
   let hideForId = Object.fromEntries(ids.map((id) => [id, true]));
 
   const { filterValue } = pluginStates.filter;
-  const { selectedDataIds } = pluginStates.select;
+
+  function goToPage(page: number) {
+    const url = new URL(window.location.href);
+    url.searchParams.set('page', page.toString());
+    window.history.pushState({ page: page.toString() }, '', url.toString());
+  }
 
   function previousPage() {
+    const { currentPage } = apiMetadata.pagination;
     if (currentPage > 1) {
-      currentPage--;
+      goToPage(currentPage - 1);
     }
   }
 
   function nextPage() {
-    if (apiMetadata.pagination.hasNextPage) {
-      currentPage++;
+    const { currentPage } = apiMetadata.pagination;
+    if (currentPage < apiMetadata.pagination.totalPages) {
+      goToPage(currentPage + 1);
     }
   }
 
   function onFirstPage() {
-    currentPage = 1;
+    goToPage(1);
   }
 
   function onLastPage() {
-    currentPage = apiMetadata.pagination.totalPages;
+    const { totalPages } = apiMetadata.pagination;
+    goToPage(totalPages);
+  }
+
+  function handleSort(cellId: string) {
+    const url = new URL(window.location.href);
+    const sortBy = cellId;
+    const order = apiMetadata.sort.order === 'asc' ? 'desc' : 'asc';
+    url.searchParams.set('sortBy', sortBy);
+    url.searchParams.set('order', order);
+    window.history.pushState({}, '', url.toString());
   }
 
   $: $hiddenColumnIds = Object.entries(hideForId)
     .filter(([, hide]) => !hide)
     .map(([id]) => id);
-
-  $: {
-    if (typeof currentPage === 'number') {
-      const url = new URL(window.location.href);
-      url.searchParams.set('page', currentPage.toString());
-      history.replaceState(null, '', url.toString());
-    }
-  }
-
-  onMount(() => {
-    const params = new URLSearchParams(window.location.search);
-    const pageParam = parseInt(params.get('page') || '1', 10);
-    currentPage =
-      !isNaN(pageParam) && pageParam > 0
-        ? pageParam
-        : apiMetadata?.pagination?.currentPage || 1;
-    currentOrder = apiMetadata?.sort?.order || 'desc';
-  });
 </script>
 
 <div class="w-full">
-  <div class="hidden py-4">
-    <Input
-      class="max-w-sm"
-      placeholder="Filter emails..."
-      type="text"
-      bind:value={$filterValue}
-    />
-  </div>
   <div class="rounded-md my-4 border">
+    <div class="m-2">
+      <Input
+        placeholder="Filter repositories..."
+        type="text"
+        bind:value={searchValue}
+        on:input={handleSearchInput}
+      />
+    </div>
+
     <Table.Root {...$tableAttrs}>
       <Table.Header>
         {#each $headerRows as headerRow}
@@ -195,18 +180,21 @@
                     {...attrs}
                     class={cn('[&:has([role=checkbox])]:pl-3')}
                   >
-                    {#if cell.id === 'stars'}
+                    {#if cell.id === 'stars' || cell.id === 'forks'}
                       <Button
                         variant="ghost"
                         class="pl-0 hover:bg-transparent"
-                        on:click={() =>
-                          (currentOrder =
-                            currentOrder === 'asc' ? 'desc' : 'asc')}
+                        on:click={() => handleSort(cell.id)}
                       >
                         <Render of={cell.render()} />
                         <ArrowUpDown
-                          class="ml-2 h-4 w-4 {currentOrder === 'asc' &&
-                            'text-white'}"
+                          class="ml-2 h-4 w-4 {apiMetadata.sort.sortBy ===
+                            cell.id &&
+                            apiMetadata.sort.order === 'asc' &&
+                            'text-green-500'} {apiMetadata.sort.sortBy ===
+                            cell.id &&
+                            apiMetadata.sort.order === 'desc' &&
+                            'text-red-500'}"
                         />
                       </Button>
                     {:else}
@@ -222,20 +210,29 @@
       <Table.Body {...$tableBodyAttrs}>
         {#each $pageRows as row (row.id)}
           <Subscribe rowAttrs={row.attrs()} let:rowAttrs>
-            <Table.Row
-              {...rowAttrs}
-              data-state={$selectedDataIds[row.id] && 'selected'}
-            >
+            <Table.Row {...rowAttrs}>
               {#each row.cells as cell (cell.id)}
                 <Subscribe attrs={cell.attrs()} let:attrs>
                   <Table.Cell class="[&:has([role=checkbox])]:pl-3" {...attrs}>
-                    {#if cell.id === 'amount'}
-                      <div class="text-right font-medium">
-                        <Render of={cell.render()} />
-                      </div>
-                    {:else if cell.id === 'status'}
-                      <div class="capitalize">
-                        <Render of={cell.render()} />
+                    {#if cell.id === 'link'}
+                      <!-- wrap it around the link of the repo -->
+                      <a
+                        href={`${cell.render()}`}
+                        class="text-right font-medium underline"
+                        target="_blank"
+                      >
+                        <Render
+                          of={extractLastSegment(cell.render() || '') ||
+                            'Unknown'}
+                        />
+                      </a>
+                    {:else if cell.id === 'author_avatar'}
+                      <div class="w-[30px]">
+                        <img
+                          src={`${cell.render()}`}
+                          class="rounded-full"
+                          alt=""
+                        />
                       </div>
                     {:else}
                       <Render of={cell.render()} />
@@ -249,44 +246,47 @@
       </Table.Body>
     </Table.Root>
   </div>
-  <div class="flex items-center justify-end space-x-2 py-4">
+  <div class="flex flex-col md:flex-row items-center space-x-2 py-4">
     <div class="text-muted-foreground flex-1 text-sm">
-      {$rows.length} repo(s) | Page {currentPage} of
+      {$rows.length} repo(s) | Page {apiMetadata.pagination.currentPage} of
       {apiMetadata.pagination.totalPages}
     </div>
 
-    <Button
-      variant="outline"
-      size="sm"
-      on:click={onFirstPage}
-      disabled={currentPage === 1 || isFetching}
-    >
-      First page
-    </Button>
+    <div class="flex flex-row items-center justify-end space-x-2 py-4">
+      <Button
+        variant="outline"
+        size="sm"
+        on:click={onFirstPage}
+        disabled={apiMetadata.pagination.currentPage === 1 || isFetching}
+      >
+        First page
+      </Button>
 
-    <Button
-      variant="outline"
-      size="sm"
-      on:click={previousPage}
-      disabled={!apiMetadata.pagination.hasPrevPage || isFetching}
-    >
-      <ArrowLeft />
-    </Button>
-    <Button
-      variant="outline"
-      size="sm"
-      on:click={nextPage}
-      disabled={!apiMetadata.pagination.hasNextPage || isFetching}
-    >
-      <ArrowRight />
-    </Button>
-    <Button
-      variant="outline"
-      size="sm"
-      on:click={onLastPage}
-      disabled={currentPage === apiMetadata.pagination.totalPages || isFetching}
-    >
-      Last page
-    </Button>
+      <Button
+        variant="outline"
+        size="sm"
+        on:click={previousPage}
+        disabled={!apiMetadata.pagination.hasPrevPage || isFetching}
+      >
+        <ArrowLeft />
+      </Button>
+      <Button
+        variant="outline"
+        size="sm"
+        on:click={nextPage}
+        disabled={!apiMetadata.pagination.hasNextPage || isFetching}
+      >
+        <ArrowRight />
+      </Button>
+      <Button
+        variant="outline"
+        size="sm"
+        on:click={onLastPage}
+        disabled={apiMetadata.pagination.currentPage ===
+          apiMetadata.pagination.totalPages || isFetching}
+      >
+        Last page
+      </Button>
+    </div>
   </div>
 </div>

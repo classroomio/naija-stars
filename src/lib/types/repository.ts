@@ -36,7 +36,7 @@ export type ApiMetadata = {
     hasPrevPage: boolean;
   };
   sort: {
-    sortBy: 'stars' | 'author';
+    sortBy: 'stars' | 'author' | 'forks';
     order: 'asc' | 'desc';
   };
 };
