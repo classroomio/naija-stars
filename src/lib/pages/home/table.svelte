@@ -21,8 +21,9 @@
   import type { Repository, ApiMetadata } from '$lib/types/repository';
 
   // import Actions from './table-actions.svelte';
-  import * as Table from '$lib/components/table/index.js';
-  import { Button } from '$lib/components/button/index.js';
+  import * as Table from '$lib/components/table';
+  import { Button } from '$lib/components/button';
+  import { BorderBeam } from '$lib/components/border-beam';
 
   export let data: Repository[] = [];
   export let apiMetadata: ApiMetadata;
@@ -154,7 +155,8 @@
 </script>
 
 <div class="w-full">
-  <div class="rounded-md my-4 border">
+  <div class="relative rounded-md my-4 border">
+    <BorderBeam size={200} duration={12} />
     <div class="m-2">
       <Input
         placeholder="Filter repositories..."

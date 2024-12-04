@@ -39,8 +39,8 @@ app.use('/v1/*', cors());
 app.get(
   '/v1/*',
   cache({
-    cacheName: 'naijastars-api',
-    cacheControl: 'max-age=3600',
+    cacheName: 'nsapi',
+    cacheControl: 'max-age=900',
     wait: true,
   })
 );

@@ -10,7 +10,7 @@
       class="h-full w-full rounded-md object-cover"
     />
     <h2
-      class="text-center scroll-m-20 border-b pb-2 text-3xl font-semibold tracking-tight transition-colors absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+      class="text-center scroll-m-20 border-b pb-2 text-3xl font-semibold tracking-tight transition-colors absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 dark:text-black"
     >
       Coming soon
     </h2>

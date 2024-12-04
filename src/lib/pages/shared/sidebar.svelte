@@ -28,7 +28,7 @@
 </script>
 
 <aside
-  class="fixed top-14 z-30 -ml-2 hidden h-[calc(100vh-3.5rem)] w-full shrink-0 md:sticky md:block"
+  class="fixed top-14 z-30 -ml-2 hidden h-[80vh] w-full shrink-0 md:sticky md:block"
 >
   <ScrollArea class="fixed left-0 h-screen py-5 px-8">
     <div class="">
