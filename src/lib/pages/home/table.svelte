@@ -3,6 +3,7 @@
   import {
     Render,
     Subscribe,
+    createRender,
     // createRender,
     createTable,
   } from 'svelte-headless-table';
@@ -24,6 +25,7 @@
   import * as Table from '$lib/components/table';
   import { Button } from '$lib/components/button';
   import { BorderBeam } from '$lib/components/border-beam';
+  import AuthorDisplay from './author-display.svelte';
 
   export let data: Repository[] = [];
   export let apiMetadata: ApiMetadata;
@@ -63,14 +65,13 @@
       accessor: 'link',
     }),
     table.column({
-      header: '',
-      accessor: 'author_avatar',
-      cell: ({ value }) => value.toLowerCase(),
-    }),
-    table.column({
       header: 'Author',
-      accessor: 'author',
-      cell: ({ value }) => value.toLowerCase(),
+      accessor: (data) => data,
+      cell: ({ value }) => {
+        return createRender(AuthorDisplay, {
+          data: value,
+        });
+      },
     }),
     table.column({
       header: 'Stars',
@@ -108,8 +109,6 @@
   const { hiddenColumnIds } = pluginStates.hide;
   const ids = flatColumns.map((c) => c.id);
   let hideForId = Object.fromEntries(ids.map((id) => [id, true]));
-
-  const { filterValue } = pluginStates.filter;
 
   function goToPage(page: number) {
     const url = new URL(window.location.href);

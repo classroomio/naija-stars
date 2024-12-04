@@ -8,6 +8,7 @@
   import detectUrlChange from 'detect-url-change';
 
   import Table from './table.svelte';
+  import Hero from './hero.svelte';
 
   let repositories: Repository[] = [];
   let apiMetadata: ApiMetadata = {
@@ -118,7 +119,7 @@
 >
   <Sidebar />
 
-  <div class="py-6 lg:gap-10 w-full max-w-2xl mx-auto">
+  <div class="py-6 lg:gap-10 w-full max-w-4xl mx-auto">
     {#if isFetching && !isMounted}
       <div class="rounded-md border w-full">
         <div class="flex flex-col gap-4 p-4">
@@ -132,21 +133,25 @@
       </div>
     {:else}
       <div>
-        <h2
-          class="mt-5 scroll-m-20 border-b pb-4 text-3xl font-semibold tracking-tight transition-colors first:mt-0"
-        >
-          Open source projects in Nigeria
-        </h2>
+        <Hero data={repositories} />
+
+        <div>
+          <h2
+            class="mt-5 scroll-m-20 border-b pb-4 text-3xl font-semibold tracking-tight text-center transition-colors first:mt-0"
+          >
+            All Projects
+          </h2>
+        </div>
+        {#key gettingFreshData}
+          <Table
+            data={repositories}
+            {apiMetadata}
+            bind:searchValue
+            isFetching={gettingFreshData}
+            onSearch={searchRepositories}
+          />
+        {/key}
       </div>
-      {#key gettingFreshData}
-        <Table
-          data={repositories}
-          {apiMetadata}
-          bind:searchValue
-          isFetching={gettingFreshData}
-          onSearch={searchRepositories}
-        />
-      {/key}
     {/if}
   </div>
 </div>
