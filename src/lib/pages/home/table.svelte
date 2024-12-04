@@ -246,45 +246,47 @@
       </Table.Body>
     </Table.Root>
   </div>
-  <div class="flex items-center justify-end space-x-2 py-4">
+  <div class="flex flex-col md:flex-row items-center space-x-2 py-4">
     <div class="text-muted-foreground flex-1 text-sm">
       {$rows.length} repo(s) | Page {apiMetadata.pagination.currentPage} of
       {apiMetadata.pagination.totalPages}
     </div>
 
-    <Button
-      variant="outline"
-      size="sm"
-      on:click={onFirstPage}
-      disabled={apiMetadata.pagination.currentPage === 1 || isFetching}
-    >
-      First page
-    </Button>
+    <div class="flex flex-row items-center justify-end space-x-2 py-4">
+      <Button
+        variant="outline"
+        size="sm"
+        on:click={onFirstPage}
+        disabled={apiMetadata.pagination.currentPage === 1 || isFetching}
+      >
+        First page
+      </Button>
 
-    <Button
-      variant="outline"
-      size="sm"
-      on:click={previousPage}
-      disabled={!apiMetadata.pagination.hasPrevPage || isFetching}
-    >
-      <ArrowLeft />
-    </Button>
-    <Button
-      variant="outline"
-      size="sm"
-      on:click={nextPage}
-      disabled={!apiMetadata.pagination.hasNextPage || isFetching}
-    >
-      <ArrowRight />
-    </Button>
-    <Button
-      variant="outline"
-      size="sm"
-      on:click={onLastPage}
-      disabled={apiMetadata.pagination.currentPage ===
-        apiMetadata.pagination.totalPages || isFetching}
-    >
-      Last page
-    </Button>
+      <Button
+        variant="outline"
+        size="sm"
+        on:click={previousPage}
+        disabled={!apiMetadata.pagination.hasPrevPage || isFetching}
+      >
+        <ArrowLeft />
+      </Button>
+      <Button
+        variant="outline"
+        size="sm"
+        on:click={nextPage}
+        disabled={!apiMetadata.pagination.hasNextPage || isFetching}
+      >
+        <ArrowRight />
+      </Button>
+      <Button
+        variant="outline"
+        size="sm"
+        on:click={onLastPage}
+        disabled={apiMetadata.pagination.currentPage ===
+          apiMetadata.pagination.totalPages || isFetching}
+      >
+        Last page
+      </Button>
+    </div>
   </div>
 </div>

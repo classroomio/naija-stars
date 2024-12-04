@@ -115,16 +115,14 @@
       <span class="sr-only" data-svelte-h="svelte-1t6m3jq">Toggle Menu</span
       ></button
     >
-    <div
-      class="flex flex-1 items-center justify-between space-x-2 md:justify-end"
-    >
+    <div class="flex flex-1 items-center space-x-2 justify-end">
       <nav class="flex items-center">
         <Button
           variant="link"
           href="https://www.madeinnigeria.dev"
           target="_blank"
           rel="noreferrer noopener"
-          class="flex items-center gap-0"
+          class="hidden md:flex items-center gap-0"
         >
           Made in Nigeria
 
@@ -135,7 +133,7 @@
           href="https://www.classroomio.com"
           target="_blank"
           rel="noreferrer noopener"
-          class="flex items-center gap-0"
+          class="hidden md:flex items-center gap-0"
         >
           ClassroomIO
 

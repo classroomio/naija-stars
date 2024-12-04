@@ -87,6 +87,12 @@
   padding-right: 2rem;
   padding-left: 2rem;
 }
+@media (max-width: 640px) {
+  .container {
+    padding-right: 0.5rem;
+    padding-left: 0.5rem;
+  }
+}
 
 .pre code {
   white-space: pre-wrap;
