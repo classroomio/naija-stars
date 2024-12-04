@@ -25,6 +25,7 @@
     "autoprefixer": "npm:autoprefixer@^10.4.20",
     "bits-ui": "npm:bits-ui@^0.21.16",
     "clsx": "npm:clsx@^2.1.1",
+    "detect-url-change": "npm:detect-url-change@^1.0.2",
     "lucide-svelte": "npm:lucide-svelte@^0.462.0",
     "mode-watcher": "npm:mode-watcher@^0.5.0",
     "postcss": "npm:postcss@^8.4.49",

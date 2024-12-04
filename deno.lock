@@ -23,6 +23,7 @@
     "npm:autoprefixer@^10.4.20": "10.4.20_postcss@8.4.49",
     "npm:bits-ui@~0.21.16": "0.21.16_svelte@5.2.10__acorn@8.14.0",
     "npm:clsx@^2.1.1": "2.1.1",
+    "npm:detect-url-change@^1.0.2": "1.0.2",
     "npm:hono-rate-limiter@*": "0.2.3_hono@4.6.5",
     "npm:hono@*": "4.6.5",
     "npm:js-yaml@^4.0.9": "4.1.0",
@@ -686,6 +687,12 @@
     "dequal@2.0.3": {
       "integrity": "sha512-0je+qPKHEMohvfRTCEo3CrPG6cAzAYgmzKyxRiYSSDkS6eGJdyVJm7WaYA5ECaAD9wLB2T4EEeymA5aFVcYXCA=="
     },
+    "detect-url-change@1.0.2": {
+      "integrity": "sha512-kw8H5SvDszrszffxBpfJ0zYQWbqNMxBuxUxz4tVwZVQMhhZmVShiXrPgEZx30H+J+iXQmmm1U39Ti2nUmIlG5g==",
+      "dependencies": [
+        "events"
+      ]
+    },
     "didyoumean@1.2.2": {
       "integrity": "sha512-gxtyfqMg7GKyhQmb056K7M3xszy/myH8w+B4RT+QXBQsvAOdc3XymqDDPHx1BgPgsdAA5SIifona89YtRATDzw=="
     },
@@ -779,6 +786,9 @@
       "dependencies": [
         "@types/estree"
       ]
+    },
+    "events@3.3.0": {
+      "integrity": "sha512-mQw+2fkQbALzQ7V0MY0IqdnXNOeTtP4r0lN9z7AAawCXgqea7bDii20AYrIBrFd/Hx0M2Ocz6S111CaFkUcb0Q=="
     },
     "execa@7.2.0": {
       "integrity": "sha512-UduyVP7TLB5IcAQl+OzLyLcS/l32W/GLg+AhHJ+ow40FOk2U3SAllPwR44v4vmdFwIWqpdwxxpQbF1n5ta9seA==",
@@ -1689,6 +1699,7 @@
       "npm:autoprefixer@^10.4.20",
       "npm:bits-ui@~0.21.16",
       "npm:clsx@^2.1.1",
+      "npm:detect-url-change@^1.0.2",
       "npm:lucide-svelte@0.462",
       "npm:mode-watcher@0.5",
       "npm:postcss@^8.4.49",

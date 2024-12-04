@@ -1,8 +1,11 @@
 <script lang="ts">
+  import { onMount } from 'svelte';
   import { API_BASE_URL } from '$lib/config';
   import { Skeleton } from '$lib/components/skeleton';
+  import Sidebar from '$lib/pages/shared/sidebar.svelte';
   import type { Repository, ApiMetadata } from '$lib/types/repository';
   import { debounce } from '$lib/functions/debounce';
+  import detectUrlChange from 'detect-url-change';
 
   import Table from './table.svelte';
 
@@ -21,54 +24,55 @@
       order: 'desc',
     },
   };
-  let currentPage: number;
-  let currentOrder: string;
-  let currentSortBy: string;
+  let currentPage: number = 1;
+  let currentOrder: string = 'desc';
+  let currentSortBy: string = 'stars';
   let searchValue: string = '';
 
-  let isFetching = false;
+  let isFetching = true;
   let isMounted = false;
 
-  const fetchRepositories = debounce(
-    async (
-      pageNumber: number = 1,
-      order: string = 'desc',
-      sortBy: string = 'stars'
-    ) => {
-      console.log('fetching repositories');
-      isFetching = true;
+  const fetchRepositories = debounce(async () => {
+    console.log('fetching repositories');
+    isFetching = true;
 
-      try {
-        const url = new URL(`${API_BASE_URL}/repositories`);
-        url.searchParams.set('limit', '10');
-        url.searchParams.set('page', pageNumber.toString());
-        url.searchParams.set('order', order);
-        url.searchParams.set('sortBy', sortBy);
+    const params = new URLSearchParams(window.location.search);
+    const page = parseInt(params.get('page') || '1', 10);
+    const order = params.get('order') || 'desc';
+    const sortBy = params.get('sortBy') || 'stars';
 
-        const response = await fetch(url);
+    try {
+      const url = new URL(`${API_BASE_URL}/repositories`);
+      url.searchParams.set('limit', '10');
+      url.searchParams.set('page', page.toString());
+      url.searchParams.set('order', order);
+      url.searchParams.set('sortBy', sortBy);
 
-        if (!response.ok) {
-          throw new Error('Failed to fetch repositories');
-        }
-        const result = await response.json();
+      const response = await fetch(url);
 
-        repositories = result.data;
-        apiMetadata = {
-          pagination: result.pagination,
-          sort: result.sort,
-        };
-      } catch (err: any) {
-        console.error(err);
+      if (!response.ok) {
+        throw new Error('Failed to fetch repositories');
       }
+      const result = await response.json();
 
-      isFetching = false;
+      repositories = result.data.map((repo: Repository, index: number) => ({
+        ...repo,
+        id: index + 1,
+      }));
+      apiMetadata = {
+        pagination: result.pagination,
+        sort: result.sort,
+      };
+    } catch (err: any) {
+      console.error(err);
+    }
 
-      if (!isMounted) {
-        isMounted = true;
-      }
-    },
-    1000
-  );
+    isFetching = false;
+
+    if (!isMounted) {
+      isMounted = true;
+    }
+  }, 1000);
 
   const searchRepositories = debounce(async (param = '') => {
     console.log('fetching repositories');
@@ -85,59 +89,64 @@
       }
 
       const result = await response.json();
-      repositories = result.data;
+      repositories = result.data.map((repo: Repository, index: number) => ({
+        ...repo,
+        id: index + 1,
+      }));
+      apiMetadata = {
+        pagination: result.pagination,
+        sort: result.sort,
+      };
     } catch (err: any) {
       console.error(err);
     }
 
     isFetching = false;
-
-    if (!isMounted) {
-      isMounted = true;
-    }
   }, 1000);
 
-  $: {
-    if (searchValue !== '') {
-      searchRepositories(searchValue);
-    }
-  }
-
-  $: fetchRepositories(currentPage, currentOrder, currentSortBy);
+  onMount(() => {
+    detectUrlChange.on('change', () => {
+      fetchRepositories();
+    });
+  });
 
   $: gettingFreshData = isFetching && isMounted;
 </script>
 
-<div class="mt-5 max-w-2xl mx-auto">
-  {#if isFetching && !isMounted}
-    <div class="rounded-md border w-full">
-      <div class="flex flex-col gap-4 p-4">
-        <Skeleton class="h-10 w-full" />
-        <Skeleton class="h-8 w-full" />
-        <Skeleton class="h-8 w-full" />
-        <Skeleton class="h-8 w-full" />
-        <Skeleton class="h-8 w-full" />
-        <Skeleton class="h-8 w-full" />
+<div
+  class="container flex-1 items-start md:grid md:grid-cols-[220px_minmax(0,1fr)] md:gap-6 lg:grid-cols-[240px_minmax(0,1fr)] lg:gap-10"
+>
+  <Sidebar />
+
+  <div class="py-6 lg:gap-10 w-full max-w-2xl mx-auto">
+    {#if isFetching && !isMounted}
+      <div class="rounded-md border w-full">
+        <div class="flex flex-col gap-4 p-4">
+          <Skeleton class="h-10 w-full" />
+          <Skeleton class="h-8 w-full" />
+          <Skeleton class="h-8 w-full" />
+          <Skeleton class="h-8 w-full" />
+          <Skeleton class="h-8 w-full" />
+          <Skeleton class="h-8 w-full" />
+        </div>
       </div>
-    </div>
-  {:else}
-    <div>
-      <h2
-        class="mt-5 scroll-m-20 border-b pb-4 text-3xl font-semibold tracking-tight transition-colors first:mt-0"
-      >
-        Open source projects in Nigeria
-      </h2>
-    </div>
-    {#key gettingFreshData}
-      <Table
-        data={repositories}
-        {apiMetadata}
-        bind:currentPage
-        bind:currentOrder
-        bind:currentSortBy
-        bind:searchValue
-        isFetching={gettingFreshData}
-      />
-    {/key}
-  {/if}
+    {:else}
+      <div>
+        <h2
+          class="mt-5 scroll-m-20 border-b pb-4 text-3xl font-semibold tracking-tight transition-colors first:mt-0"
+        >
+          Open source projects in Nigeria
+        </h2>
+      </div>
+      {#key gettingFreshData}
+        <Table
+          data={repositories}
+          {apiMetadata}
+          bind:searchValue
+          isFetching={gettingFreshData}
+          onSearch={searchRepositories}
+        />
+      {/key}
+    {/if}
+  </div>
 </div>

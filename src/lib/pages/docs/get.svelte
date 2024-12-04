@@ -1,79 +1,57 @@
+<script lang="ts">
+  const parameters = [
+    {
+      name: 'page',
+      type: 'number',
+      description: 'Page number of repository e.g. 1 | 2 | 3',
+    },
+    {
+      name: 'limit',
+      type: 'number',
+      description: 'Limit per page e.g. 10',
+    },
+    {
+      name: 'sortBy',
+      type: 'string',
+      description: 'Sort by stars e.g. stars | author | forks',
+    },
+    {
+      name: 'order',
+      type: 'string',
+      description: 'Order of sorting e.g. asc | desc',
+    },
+  ];
+</script>
+
 <section
-  class="border w-full rounded-md flex flex-col md:flex-row item-start gap-5 p-5 h-[80vh] overflow-hidden overflow-y-auto"
+  class="border w-full rounded-md flex flex-col md:flex-row item-start gap-5 p-5"
 >
   <section class="md:w-2/4 w-full">
     <h1 class="text-xl">Get Repositories</h1>
     <p class="text-sm mt-1">Get Repositories from the database</p>
 
-    <div class="border rounded-md p-2.5 my-5 text-sm">
-      <span class="bg-green-900 text-green-500 px-2 py-1 text-sm rounded-sm">GET</span>
-      <span class="tracking-wide ml-1"> / api / repositories</span>
+    <div class="border-2 rounded-md p-2.5 my-5 text-sm">
+      <span class="bg-green-900 text-green-500 px-2 py-1 text-sm rounded-sm">
+        GET
+      </span>
+      <span class="tracking-wide ml-1">/v1/repositories</span>
     </div>
 
     <h1 class="text-xl">Request</h1>
     <p class="text-sm mt-2">Query Parameters</p>
 
-    <div class="≈p-2.5 mt-10 text-sm">
-      <div class="flex items-center gap-5 mb-4">
-        <p>page</p>
-        <p class="text-xs px-2 py-0.5 bg-red-50 text-black rounded-md">number</p>
+    {#each parameters as param}
+      <div class="≈p-2.5 mt-10 text-sm">
+        <div class="flex items-center gap-5 mb-4">
+          <p>{param.name}</p>
+          <p class="text-xs px-2 py-0.5 bg-red-50 text-black rounded-md">
+            {param.type}
+          </p>
+        </div>
+
+        <p>{param.description}</p>
       </div>
-
-      <p>Page number of repository e.g. 1 | 2 | 3</p>
-    </div>
-
-    <div class="≈p-2.5 mt-10 text-sm">
-      <div class="flex items-center gap-5 mb-4">
-        <p>limit</p>
-        <p class="text-xs px-2 py-0.5 bg-red-50 text-black rounded-md">number</p>
-      </div>
-
-      <p>Limit per page e.g. 10</p>
-    </div>
-
-    <div class="≈p-2.5 mt-10 text-sm">
-      <div class="flex items-center gap-5 mb-4">
-        <p>sortBy</p>
-        <p class="text-xs px-2 py-0.5 bg-red-50 text-black rounded-md">string</p>
-      </div>
-
-      <p>Sort by stars e.g. stars | author | forks</p>
-    </div>
-
-    <div class="≈p-2.5 mt-10 text-sm">
-      <div class="flex items-center gap-5 mb-4">
-        <p>order</p>
-        <p class="text-xs px-2 py-0.5 bg-red-50 text-black rounded-md">string</p>
-      </div>
-
-      <p>Order of sorting e.g. asc | desc</p>
-    </div>
-    <div class="≈p-2.5 mt-10 text-sm">
-      <div class="flex items-center gap-5 mb-4">
-        <p>limit</p>
-        <p class="text-xs px-2 py-0.5 bg-red-50 text-black rounded-md">number</p>
-      </div>
-
-      <p>Limit per page e.g. 10</p>
-    </div>
-
-    <div class="≈p-2.5 mt-10 text-sm">
-      <div class="flex items-center gap-5 mb-4">
-        <p>sortBy</p>
-        <p class="text-xs px-2 py-0.5 bg-red-50 text-black rounded-md">string</p>
-      </div>
-
-      <p>Sort by stars e.g. stars | author | forks</p>
-    </div>
-
-    <div class="≈p-2.5 mt-10 text-sm">
-      <div class="flex items-center gap-5 mb-4">
-        <p>order</p>
-        <p class="text-xs px-2 py-0.5 bg-red-50 text-black rounded-md">string</p>
-      </div>
-
-      <p>Order of sorting e.g. asc | desc</p>
-    </div>
+    {/each}
   </section>
 
   <section class="md:w-2/4 w-full flex flex-col gap-5">
@@ -81,11 +59,11 @@
       class="flex flex-col gap-3 bg-white dark:bg-transparent border dark:text-white rounded-md h-auto p-4 text-xs"
     >
       <p>curl --request GET \</p>
-      <p>--url http://localhost:8000/api/repositories \</p>
+      <p>--url https://api.naijastars.dev/v1/repositories \</p>
     </div>
 
     <div
-      class="bg-white dark:bg-transparent border dark:text-white rounded-md h-[90%] md:h-[80%] overflow-auto"
+      class="bg-white dark:bg-transparent border dark:text-white rounded-md h-[75vh] overflow-y-auto"
     >
       <pre>
         <code class="language-json text-xs">

@@ -1,10 +1,9 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
   import { readable } from 'svelte/store';
   import {
     Render,
     Subscribe,
-    createRender,
+    // createRender,
     createTable,
   } from 'svelte-headless-table';
   import {
@@ -21,17 +20,15 @@
   import { Input } from '$lib/components/input';
   import type { Repository, ApiMetadata } from '$lib/types/repository';
 
-  import Actions from './table-actions.svelte';
+  // import Actions from './table-actions.svelte';
   import * as Table from '$lib/components/table/index.js';
   import { Button } from '$lib/components/button/index.js';
 
   export let data: Repository[] = [];
   export let apiMetadata: ApiMetadata;
-  export let currentPage: number;
-  export let currentOrder: string;
-  export let currentSortBy: string;
-  export let searchValue: string = '';
   export let isFetching: boolean;
+  export let searchValue: string;
+  export let onSearch: (value: string) => void;
 
   function extractLastSegment(url) {
     if (typeof url !== 'string' || !url.includes('/')) {
@@ -43,7 +40,7 @@
   function handleSearchInput(event: Event) {
     const input = event.target as HTMLInputElement;
     searchValue = input.value;
-    filterValue.set(input.value);
+    onSearch(input.value);
   }
 
   const table = createTable(readable(data), {
@@ -56,6 +53,10 @@
   });
 
   const columns = table.createColumns([
+    table.column({
+      header: '#',
+      accessor: 'id',
+    }),
     table.column({
       header: 'Name',
       accessor: 'link',
@@ -84,13 +85,13 @@
         return value;
       },
     }),
-    table.column({
-      header: '',
-      accessor: (data) => data,
-      cell: (item) => {
-        return createRender(Actions, { data: item.value });
-      },
-    }),
+    // table.column({
+    //   header: '',
+    //   accessor: (data) => data,
+    //   cell: (item) => {
+    //     return createRender(Actions, { data: item.value });
+    //   },
+    // }),
   ]);
 
   const {
@@ -109,48 +110,47 @@
 
   const { filterValue } = pluginStates.filter;
 
+  function goToPage(page: number) {
+    const url = new URL(window.location.href);
+    url.searchParams.set('page', page.toString());
+    window.history.pushState({ page: page.toString() }, '', url.toString());
+  }
+
   function previousPage() {
+    const { currentPage } = apiMetadata.pagination;
     if (currentPage > 1) {
-      currentPage--;
+      goToPage(currentPage - 1);
     }
   }
 
   function nextPage() {
-    if (apiMetadata.pagination.hasNextPage) {
-      currentPage++;
+    const { currentPage } = apiMetadata.pagination;
+    if (currentPage < apiMetadata.pagination.totalPages) {
+      goToPage(currentPage + 1);
     }
   }
 
   function onFirstPage() {
-    currentPage = 1;
+    goToPage(1);
   }
 
   function onLastPage() {
-    currentPage = apiMetadata.pagination.totalPages;
+    const { totalPages } = apiMetadata.pagination;
+    goToPage(totalPages);
+  }
+
+  function handleSort(cellId: string) {
+    const url = new URL(window.location.href);
+    const sortBy = cellId;
+    const order = apiMetadata.sort.order === 'asc' ? 'desc' : 'asc';
+    url.searchParams.set('sortBy', sortBy);
+    url.searchParams.set('order', order);
+    window.history.pushState({}, '', url.toString());
   }
 
   $: $hiddenColumnIds = Object.entries(hideForId)
     .filter(([, hide]) => !hide)
     .map(([id]) => id);
-
-  $: {
-    if (typeof currentPage === 'number') {
-      const url = new URL(window.location.href);
-      url.searchParams.set('page', currentPage.toString());
-      history.replaceState(null, '', url.toString());
-    }
-  }
-
-  onMount(() => {
-    console.log(data);
-    const params = new URLSearchParams(window.location.search);
-    const pageParam = parseInt(params.get('page') || '1', 10);
-    currentPage =
-      !isNaN(pageParam) && pageParam > 0
-        ? pageParam
-        : apiMetadata?.pagination?.currentPage || 1;
-    currentOrder = apiMetadata?.sort?.order || 'desc';
-  });
 </script>
 
 <div class="w-full">
@@ -159,7 +159,7 @@
       <Input
         placeholder="Filter repositories..."
         type="text"
-        bind:value={$filterValue}
+        bind:value={searchValue}
         on:input={handleSearchInput}
       />
     </div>
@@ -184,25 +184,16 @@
                       <Button
                         variant="ghost"
                         class="pl-0 hover:bg-transparent"
-                        on:click={() => {
-                          if (cell.id === 'stars') {
-                            currentSortBy = 'stars';
-                            currentOrder =
-                              currentOrder === 'asc' ? 'desc' : 'asc';
-                          }
-                          if (cell.id === 'forks') {
-                            currentSortBy = 'forks';
-                            currentOrder =
-                              currentOrder === 'asc' ? 'desc' : 'asc';
-                          }
-                        }}
+                        on:click={() => handleSort(cell.id)}
                       >
                         <Render of={cell.render()} />
                         <ArrowUpDown
-                          class="ml-2 h-4 w-4 {currentSortBy === cell.id &&
-                            currentOrder === 'asc' &&
-                            'text-green-500'} {currentSortBy === cell.id &&
-                            currentOrder === 'desc' &&
+                          class="ml-2 h-4 w-4 {apiMetadata.sort.sortBy ===
+                            cell.id &&
+                            apiMetadata.sort.order === 'asc' &&
+                            'text-green-500'} {apiMetadata.sort.sortBy ===
+                            cell.id &&
+                            apiMetadata.sort.order === 'desc' &&
                             'text-red-500'}"
                         />
                       </Button>
@@ -227,7 +218,7 @@
                       <!-- wrap it around the link of the repo -->
                       <a
                         href={`${cell.render()}`}
-                        class="text-right font-medium"
+                        class="text-right font-medium underline"
                         target="_blank"
                       >
                         <Render
@@ -257,7 +248,7 @@
   </div>
   <div class="flex items-center justify-end space-x-2 py-4">
     <div class="text-muted-foreground flex-1 text-sm">
-      {$rows.length} repo(s) | Page {currentPage} of
+      {$rows.length} repo(s) | Page {apiMetadata.pagination.currentPage} of
       {apiMetadata.pagination.totalPages}
     </div>
 
@@ -265,7 +256,7 @@
       variant="outline"
       size="sm"
       on:click={onFirstPage}
-      disabled={currentPage === 1 || isFetching}
+      disabled={apiMetadata.pagination.currentPage === 1 || isFetching}
     >
       First page
     </Button>
@@ -290,7 +281,8 @@
       variant="outline"
       size="sm"
       on:click={onLastPage}
-      disabled={currentPage === apiMetadata.pagination.totalPages || isFetching}
+      disabled={apiMetadata.pagination.currentPage ===
+        apiMetadata.pagination.totalPages || isFetching}
     >
       Last page
     </Button>

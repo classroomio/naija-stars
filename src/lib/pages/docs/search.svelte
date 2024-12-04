@@ -1,13 +1,15 @@
 <section
-  class="border rounded-md flex flex-col md:flex-row item-start gap-5 p-5 h-[80vh] overflow-hidden overflow-y-auto"
+  class="border rounded-md flex flex-col md:flex-row item-start gap-5 p-5 h-[80vh] overflow-y-auto"
 >
   <section class="md:w-2/4 w-full">
     <h1 class="text-xl">Search Repositories</h1>
     <p class="text-sm mt-1">Search for Repositories from the database</p>
 
     <div class="border rounded-md p-2.5 my-5 text-sm">
-      <span class="bg-green-900 text-green-500 px-2 py-1 text-sm rounded-sm">GET</span>
-      <span class="tracking-wide ml-1"> / api / repositories / search</span>
+      <span class="bg-green-900 text-green-500 px-2 py-1 text-sm rounded-sm"
+        >GET</span
+      >
+      <span class="tracking-wide ml-1"> / v1 / repositories / search</span>
     </div>
 
     <h1 class="text-xl">Request</h1>
@@ -16,7 +18,9 @@
     <div class="≈p-2.5 mt-10 text-sm">
       <div class="flex items-center gap-5 mb-4">
         <p>text</p>
-        <p class="text-xs px-2 py-0.5 bg-red-50 text-black rounded-md">string</p>
+        <p class="text-xs px-2 py-0.5 bg-red-50 text-black rounded-md">
+          string
+        </p>
       </div>
 
       <p>Search value</p>
@@ -28,7 +32,7 @@
       class="flex flex-col gap-3 bg-white dark:bg-transparent border dark:text-white rounded-md h-auto p-4 text-xs"
     >
       <p>curl --request GET \</p>
-      <p>--url http://localhost:8000/api/repositories/search \</p>
+      <p>--url https://api.naijastars.dev/v1/repositories/search \</p>
     </div>
 
     <div

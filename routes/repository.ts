@@ -108,14 +108,23 @@ app.get('/repositories/search', async (c) => {
       SELECT *
       FROM repository
       WHERE name ILIKE '%' || ${text} || '%'
-        OR author ILIKE '%' || ${text} || '%';
+        OR author ILIKE '%' || ${text} || '%'
+        LIMIT ${LIMIT_PER_PAGE};
     `;
 
     return c.json({
       data: repositories,
-      search: {
-        text,
+      pagination: {
+        currentPage: 1,
+        totalPages: 1,
         totalItems: repositories.length,
+        itemsPerPage: LIMIT_PER_PAGE,
+        hasNextPage: false,
+        hasPrevPage: false,
+      },
+      sort: {
+        sortBy: 'stars',
+        order: 'desc',
       },
     });
   } catch (error) {
@@ -123,6 +132,5 @@ app.get('/repositories/search', async (c) => {
     return c.json({ error: 'Failed to search repositories' }, 500);
   }
 });
-
 
 export default app;
