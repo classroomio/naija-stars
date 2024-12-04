@@ -139,10 +139,7 @@
 
           <ArrowUpRight class="h-4" />
         </Button>
-        <a
-          href="https://github.com/classroomio/classroomio"
-          target="_blank"
-          rel="noopener noreferrer"
+        <a href="/github" target="_blank" rel="noopener noreferrer"
           ><div
             class="focus-visible:ring-ring inline-flex items-center justify-center whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground rounded-md text-xs h-8 w-8 px-0"
           >

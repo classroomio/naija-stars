@@ -3,6 +3,11 @@ import { serveDir } from 'https://deno.land/std@0.190.0/http/file_server.ts';
 
 serve(async (req) => {
   const url = new URL(req.url);
+
+  if (url.pathname.includes('github')) {
+    return Response.redirect('https://github.com/classroomio/naija-stars', 302);
+  }
+
   let isIndex = url.pathname === '/' || url.pathname === '/index.html';
 
   let res = await serveDir(req, {
