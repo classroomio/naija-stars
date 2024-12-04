@@ -14,7 +14,7 @@
     'group flex overflow-hidden p-2 [--duration:2s] [--gap:1rem] [gap:var(--gap)]',
     {
       'flex-row': !vertical,
-      'flex-col': vertical
+      'flex-col': vertical,
     },
     className
   )}
@@ -25,7 +25,7 @@
         'animate-marquee flex-row': !vertical,
         'animate-marquee-vertical flex-col': vertical,
         'group-hover:[animation-play-state:paused]': pauseOnHover,
-        '[animation-direction:reverse]': reverse
+        '[animation-direction:reverse]': reverse,
       })}
     >
       <slot>Default</slot>

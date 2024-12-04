@@ -23,7 +23,13 @@
 >
   <div class="flex flex-row justify-between items-center">
     <div class="flex flex-row items-center gap-2">
-      <img class="rounded-full" width="32" height="32" alt="" src={author_avatar} />
+      <img
+        class="rounded-full"
+        width="32"
+        height="32"
+        alt=""
+        src={author_avatar}
+      />
       <div class="flex flex-col">
         <!-- svelte-ignore a11y-structure -->
         <figcaption class="text-sm font-medium dark:text-white">

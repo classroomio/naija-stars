@@ -18,12 +18,12 @@
       totalItems: 250,
       itemsPerPage: 10,
       hasNextPage: false,
-      hasPrevPage: false
+      hasPrevPage: false,
     },
     sort: {
       sortBy: 'stars',
-      order: 'desc'
-    }
+      order: 'desc',
+    },
   };
   let currentPage: number = 1;
   let currentOrder: string = 'desc';
@@ -58,11 +58,11 @@
 
       repositories = result.data.map((repo: Repository, index: number) => ({
         ...repo,
-        id: index + 1 + (page - 1) * 10
+        id: index + 1 + (page - 1) * 10,
       }));
       apiMetadata = {
         pagination: result.pagination,
-        sort: result.sort
+        sort: result.sort,
       };
     } catch (err: any) {
       console.error(err);
@@ -92,11 +92,11 @@
       const result = await response.json();
       repositories = result.data.map((repo: Repository, index: number) => ({
         ...repo,
-        id: index + 1
+        id: index + 1,
       }));
       apiMetadata = {
         pagination: result.pagination,
-        sort: result.sort
+        sort: result.sort,
       };
     } catch (err: any) {
       console.error(err);
@@ -137,9 +137,9 @@
 
         <div>
           <h2
-            class="mt-5 scroll-m-20 border-b pb-4 text-3xl font-semibold tracking-tight transition-colors first:mt-0"
+            class="mt-5 scroll-m-20 border-b pb-4 text-3xl font-semibold tracking-tight text-center transition-colors first:mt-0"
           >
-            Open source projects in Nigeria
+            All Projects
           </h2>
         </div>
         {#key gettingFreshData}

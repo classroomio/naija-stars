@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { Repository } from '$lib/types/repository';
-  import Marquee from './marquee.svelte';
-  import MarqueeCard from './marquee-card.svelte';
+  import { Marquee, MarqueeCard } from '$lib/components/marquee';
+  import { BorderBeam } from '$lib/components/border-beam';
 
   export let data: Repository[] = [];
 
@@ -10,12 +10,13 @@
 </script>
 
 <div
-  class="relative flex h-full w-full flex-col items-center justify-center overflow-hidden rounded-lg border bg-background py-5 mb-5 md:shadow-xl"
+  class="relative flex h-full w-full flex-col items-center justify-center overflow-hidden rounded-lg border bg-background py-2 mb-5"
 >
+  <BorderBeam size={300} duration={12} />
   <h2
     class="mt-5 scroll-m-20 border-b pb-4 md:text-3xl text-center font-semibold tracking-tight transition-colors first:mt-0"
   >
-    Open 10 source projects in Nigeria
+    The Odogwu's
   </h2>
   <Marquee pauseOnHover class="[--duration:20s]">
     {#each firstRow as item}

@@ -5,13 +5,13 @@
     Subscribe,
     createRender,
     // createRender,
-    createTable
+    createTable,
   } from 'svelte-headless-table';
   import {
     addHiddenColumns,
     addPagination,
     addSortBy,
-    addTableFilter
+    addTableFilter,
   } from 'svelte-headless-table/plugins';
   import ArrowUpDown from 'lucide-svelte/icons/arrow-up-down';
   import ArrowRight from 'lucide-svelte/icons/chevron-right';
@@ -50,43 +50,43 @@
     sort: addSortBy({ disableMultiSort: true }),
     page: addPagination(),
     filter: addTableFilter({
-      fn: ({ filterValue, value }) => value.includes(filterValue)
+      fn: ({ filterValue, value }) => value.includes(filterValue),
     }),
-    hide: addHiddenColumns()
+    hide: addHiddenColumns(),
   });
 
   const columns = table.createColumns([
     table.column({
       header: '#',
-      accessor: 'id'
+      accessor: 'id',
     }),
     table.column({
       header: 'Name',
-      accessor: 'link'
+      accessor: 'link',
     }),
     table.column({
       header: 'Author',
       accessor: (data) => data,
       cell: ({ value }) => {
         return createRender(AuthorDisplay, {
-          data: value
+          data: value,
         });
-      }
+      },
     }),
     table.column({
       header: 'Stars',
       accessor: 'stars',
       cell: ({ value }) => {
         return value;
-      }
+      },
     }),
     table.column({
       header: 'Forks',
       accessor: 'forks',
       cell: ({ value }) => {
         return value;
-      }
-    })
+      },
+    }),
     // table.column({
     //   header: '',
     //   accessor: (data) => data,
@@ -96,14 +96,19 @@
     // }),
   ]);
 
-  const { headerRows, pageRows, tableAttrs, tableBodyAttrs, flatColumns, pluginStates, rows } =
-    table.createViewModel(columns);
+  const {
+    headerRows,
+    pageRows,
+    tableAttrs,
+    tableBodyAttrs,
+    flatColumns,
+    pluginStates,
+    rows,
+  } = table.createViewModel(columns);
 
   const { hiddenColumnIds } = pluginStates.hide;
   const ids = flatColumns.map((c) => c.id);
   let hideForId = Object.fromEntries(ids.map((id) => [id, true]));
-
-  const { filterValue } = pluginStates.filter;
 
   function goToPage(page: number) {
     const url = new URL(window.location.href);
@@ -166,8 +171,16 @@
           <Subscribe rowAttrs={headerRow.attrs()}>
             <Table.Row>
               {#each headerRow.cells as cell (cell.id)}
-                <Subscribe attrs={cell.attrs()} let:attrs props={cell.props()} let:props>
-                  <Table.Head {...attrs} class={cn('[&:has([role=checkbox])]:pl-3')}>
+                <Subscribe
+                  attrs={cell.attrs()}
+                  let:attrs
+                  props={cell.props()}
+                  let:props
+                >
+                  <Table.Head
+                    {...attrs}
+                    class={cn('[&:has([role=checkbox])]:pl-3')}
+                  >
                     {#if cell.id === 'stars' || cell.id === 'forks'}
                       <Button
                         variant="ghost"
@@ -176,9 +189,11 @@
                       >
                         <Render of={cell.render()} />
                         <ArrowUpDown
-                          class="ml-2 h-4 w-4 {apiMetadata.sort.sortBy === cell.id &&
+                          class="ml-2 h-4 w-4 {apiMetadata.sort.sortBy ===
+                            cell.id &&
                             apiMetadata.sort.order === 'asc' &&
-                            'text-green-500'} {apiMetadata.sort.sortBy === cell.id &&
+                            'text-green-500'} {apiMetadata.sort.sortBy ===
+                            cell.id &&
                             apiMetadata.sort.order === 'desc' &&
                             'text-red-500'}"
                         />
@@ -207,11 +222,18 @@
                         class="text-right font-medium underline"
                         target="_blank"
                       >
-                        <Render of={extractLastSegment(cell.render() || '') || 'Unknown'} />
+                        <Render
+                          of={extractLastSegment(cell.render() || '') ||
+                            'Unknown'}
+                        />
                       </a>
                     {:else if cell.id === 'author_avatar'}
                       <div class="w-[30px]">
-                        <img src={`${cell.render()}`} class="rounded-full" alt="" />
+                        <img
+                          src={`${cell.render()}`}
+                          class="rounded-full"
+                          alt=""
+                        />
                       </div>
                     {:else}
                       <Render of={cell.render()} />
@@ -261,8 +283,8 @@
         variant="outline"
         size="sm"
         on:click={onLastPage}
-        disabled={apiMetadata.pagination.currentPage === apiMetadata.pagination.totalPages ||
-          isFetching}
+        disabled={apiMetadata.pagination.currentPage ===
+          apiMetadata.pagination.totalPages || isFetching}
       >
         Last page
       </Button>
