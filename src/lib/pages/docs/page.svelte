@@ -22,7 +22,7 @@
 
 <Router {url}>
   <main
-    class="relative flex flex-col gap-y-5 w-full md:items-start md:grid md:grid-cols-[220px_minmax(0,1fr)] md:gap-6 lg:grid-cols-[280px_minmax(0,1fr)] lg:gap-10 md:min-h-[80vh]"
+    class="relative p-10 flex flex-col gap-y-5 w-full md:items-start md:grid md:grid-cols-[220px_minmax(0,1fr)] md:gap-6 lg:grid-cols-[280px_minmax(0,1fr)] lg:gap-10 md:min-h-[80vh]"
   >
     <aside class="md:sticky top-0 z-30 h-full w-full shrink-0">
       <button on:click={() => (state = '')} class="mb-3 p-2 text-xl">
