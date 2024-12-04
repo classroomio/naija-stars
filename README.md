@@ -19,6 +19,8 @@ Visualization of the open source projects built by Nigerian developers.
 
 Before running any command, make sure you copy the contents of `.env.example` to `.env` and set the correct values.
 
+- `deno run dev` - Start the both frontend and backend servers.
+
 - `deno run be:dev` - Start the backend server.
 - `deno run be:scrape` - Scrape the repositories.
 

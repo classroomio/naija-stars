@@ -33,9 +33,9 @@
         {#each navigation as nav}
           <button
             on:click={() => (state = nav.label)}
-            class="p-2 flex items-center gap-5 rounded-md border-2 border-background hover:border-2 hover:border-gray-200 dark:hover:border-neutral-800 {state ===
+            class="p-2 flex items-center gap-5 rounded-md border-2 border-background hover:border-2 hover:border-gray-200 dark:hover:border-neutral-800 cursor-pointer {state ===
               nav.label &&
-              'dark:bg-neutral-800 text-black dark:text-white border-2 border-gray-200 dark:border-neutral-800'}"
+              ' text-black dark:text-white border-2 border-gray-200 dark:border-neutral-800'}"
           >
             <span
               class="px-2 py-1 text-xs rounded-sm uppercase w-[30%] {nav.label ===

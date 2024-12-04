@@ -25,9 +25,6 @@
       order: 'desc',
     },
   };
-  let currentPage: number = 1;
-  let currentOrder: string = 'desc';
-  let currentSortBy: string = 'stars';
   let searchValue: string = '';
 
   let isFetching = true;
@@ -120,6 +117,13 @@
   <Sidebar />
 
   <div class="py-6 lg:gap-10 w-full max-w-4xl mx-auto">
+    <Hero />
+
+    <h2
+      class="mt-5 scroll-m-20 border-b pb-4 text-3xl font-semibold tracking-tight text-center transition-colors first:mt-0"
+    >
+      All Projects
+    </h2>
     {#if isFetching && !isMounted}
       <div class="rounded-md border w-full">
         <div class="flex flex-col gap-4 p-4">
@@ -132,26 +136,15 @@
         </div>
       </div>
     {:else}
-      <div>
-        <Hero data={repositories} />
-
-        <div>
-          <h2
-            class="mt-5 scroll-m-20 border-b pb-4 text-3xl font-semibold tracking-tight text-center transition-colors first:mt-0"
-          >
-            All Projects
-          </h2>
-        </div>
-        {#key gettingFreshData}
-          <Table
-            data={repositories}
-            {apiMetadata}
-            bind:searchValue
-            isFetching={gettingFreshData}
-            onSearch={searchRepositories}
-          />
-        {/key}
-      </div>
+      {#key gettingFreshData}
+        <Table
+          data={repositories}
+          {apiMetadata}
+          bind:searchValue
+          isFetching={gettingFreshData}
+          onSearch={searchRepositories}
+        />
+      {/key}
     {/if}
   </div>
 </div>
