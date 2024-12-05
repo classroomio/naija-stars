@@ -17,24 +17,6 @@ const PORT = Number(Deno.env.get('PORT')) || 8000;
 const app = new Hono();
 
 /** MIDDLEWARES */
-if (Deno.env.get('NODE_ENV') === 'production') {
-  console.log('Rate limiting enabled');
-
-  const redis = new Redis({
-    url: Deno.env.get('UPSTASH_REDIS_REST_URL'),
-    token: Deno.env.get('UPSTASH_REDIS_REST_TOKEN'),
-  });
-
-  const limiter = rateLimiter({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    limit: 5, // Limit each IP to 50 requests per `window` (here, per 15 minutes).
-    standardHeaders: 'draft-6', // draft-6: `RateLimit-*` headers; draft-7: combined `RateLimit` header
-    keyGenerator: (c) => c.req.header('cf-connecting-ip') ?? '', // Method to generate custom identifiers for clients.
-    store: new RedisStore({ client: redis }),
-  });
-
-  app.use(limiter);
-}
 
 app.use('/v1/*', cors());
 
@@ -46,6 +28,25 @@ app.get(
     wait: true,
   })
 );
+
+if (Deno.env.get('NODE_ENV') === 'production') {
+  console.log('Rate limiting enabled');
+
+  const redis = new Redis({
+    url: Deno.env.get('UPSTASH_REDIS_REST_URL'),
+    token: Deno.env.get('UPSTASH_REDIS_REST_TOKEN'),
+  });
+
+  const limiter = rateLimiter({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    limit: 100, // Limit each IP to 50 requests per `window` (here, per 15 minutes).
+    standardHeaders: 'draft-6', // draft-6: `RateLimit-*` headers; draft-7: combined `RateLimit` header
+    keyGenerator: (c) => c.req.header('cf-connecting-ip') ?? '', // Method to generate custom identifiers for clients.
+    store: new RedisStore({ client: redis }),
+  });
+
+  app.use(limiter);
+}
 
 /** ROUTES */
 // Root route
