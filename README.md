@@ -13,7 +13,7 @@ Visualization of the open source projects built by Nigerian developers.
 
 ## Demo
 
-[![Demo Video](https://img.youtube.com/vi/_xsIeTr7ack/0.jpg)](https://youtu.be/_xsIeTr7ack)
+[![Demo Video](/src/lib/assets/demo-thumbnail.png)](https://youtu.be/_xsIeTr7ack)
 
 ## Commands
 
