@@ -77,6 +77,10 @@ const fetchDataFromGithub = async (
   return repositories;
 };
 
+function cleanAuthor(link: string) {
+  return link.replace(/[\(\)]/g, '');
+}
+
 function convertToJSON(repositories: string[]): ScrapedRepository[] {
   return repositories.map((repository) => {
     const parser = new DOMParser();
@@ -92,8 +96,8 @@ function convertToJSON(repositories: string[]): ScrapedRepository[] {
     return {
       name,
       link,
-      author,
-      authorLink,
+      author: cleanAuthor(author),
+      authorLink: cleanAuthor(authorLink),
     };
   });
 }
