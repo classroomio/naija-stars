@@ -59,20 +59,19 @@
     </a>
   </p>
   <div class="container flex h-14 max-w-screen-2xl items-center">
-    <div class="mr-4 hidden md:flex">
-      <a href="/" class="mr-6 flex items-center space-x-4">
+    <div class="mr-4 hidden md:flex items-center">
+      <Link to={'/'} class="mr-6 flex items-center space-x-4">
         <img src={logo192} alt="Naija Stars" class="h-8 w-8" />
 
         <span class="hidden font-bold xl:inline-block">Naija Stars</span>
-
-        <Link
-          to={'/api'}
-          class="transition-colors text-foreground/50 hover:underline cursor-pointer"
-          let:active
-        >
-          <span class={active ? 'text-foreground/90' : ''}> API </span>
-        </Link>
-      </a>
+      </Link>
+      <Link
+        to={'/api'}
+        class="transition-colors text-foreground/50 hover:underline cursor-pointer"
+        let:active
+      >
+        <span class={active ? 'text-foreground/90' : ''}> API </span>
+      </Link>
       <!-- <nav class="flex items-center gap-3 text-sm">
         
       </nav> -->

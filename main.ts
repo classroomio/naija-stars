@@ -68,8 +68,12 @@ Deno.serve({ port: PORT }, app.fetch);
 Deno.cron('scrape-repositories', '0 */12 * * *', async () => {
   console.log('Running repository scraper...');
   try {
-    await scrape();
-    console.log('Repository scrape completed successfully');
+    if (Deno.env.get('NODE_ENV') === 'production') {
+      await scrape();
+      console.log('Repository scrape completed successfully');
+    } else {
+      console.log('Skipping repository scrape in non-production environment');
+    }
   } catch (error) {
     console.error('Error running repository scraper:', error);
   }
