@@ -98,7 +98,7 @@ function convertToJSON(repositories: string[]): ScrapedRepository[] {
   });
 }
 
-const getData = async () => {
+export const scrape = async () => {
   console.log('Fetching Repositories From GitHub...');
 
   const response = await fetch(
@@ -183,5 +183,3 @@ const getData = async () => {
 
   console.log('Data saved to Neon.');
 };
-
-getData();

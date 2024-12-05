@@ -6,6 +6,8 @@ import { rateLimiter } from 'npm:hono-rate-limiter';
 import { Redis } from '@upstash/redis';
 import { RedisStore } from '@hono-rate-limiter/redis';
 
+import { scrape } from './utils/scrape/index.ts';
+
 import RepositoryHandler from './routes/repository.ts';
 
 import 'jsr:@std/dotenv/load';
@@ -60,3 +62,15 @@ app.route('/v1', RepositoryHandler);
 console.log(`API server running on http://localhost:${PORT}`);
 
 Deno.serve({ port: PORT }, app.fetch);
+
+/** Cron Jobs */
+
+Deno.cron('scrape-repositories', '0 */12 * * *', async () => {
+  console.log('Running repository scraper...');
+  try {
+    await scrape();
+    console.log('Repository scrape completed successfully');
+  } catch (error) {
+    console.error('Error running repository scraper:', error);
+  }
+});

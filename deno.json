@@ -5,8 +5,8 @@
     "fe:build": "deno run -A --node-modules-dir npm:vite build",
     "fe:preview": "deno run -A --node-modules-dir npm:vite preview",
     "fe:serve": "deno run --allow-net --allow-read vite_server.ts",
-    "be:dev": "deno run --allow-all --watch --env-file main.ts",
-    "be:scrape": "deno run --allow-all --env-file utils/scrape/index.ts",
+    "be:dev": "deno run --allow-all --watch --env-file --unstable-cron main.ts",
+    "be:scrape": "deno run --allow-all --env-file utils/scrape/run.ts",
     "be:deploy": "deployctl deploy --prod --env-file=.env --project=naijastars-api --exclude=./node_modules --exclude=./dist --exclude=./src --exclude=./.vite main.ts"
   },
   "compilerOptions": {
