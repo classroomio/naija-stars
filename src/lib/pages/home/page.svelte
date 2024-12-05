@@ -122,7 +122,7 @@
     <h2
       class="mt-5 scroll-m-20 border-b pb-4 text-3xl font-semibold tracking-tight text-center transition-colors first:mt-0"
     >
-      All Projects
+      All Open Source Projects By Nigerians
     </h2>
     {#if isFetching && !isMounted}
       <div class="rounded-md border w-full">

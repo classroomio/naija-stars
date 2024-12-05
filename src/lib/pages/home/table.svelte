@@ -219,7 +219,7 @@
                       <!-- wrap it around the link of the repo -->
                       <a
                         href={`${cell.render()}`}
-                        class="text-right font-medium underline"
+                        class="text-left font-medium underline"
                         target="_blank"
                       >
                         <Render

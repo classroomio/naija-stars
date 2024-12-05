@@ -13,10 +13,6 @@
       to: '/stats/forks',
     },
     {
-      label: 'Most popular license',
-      to: '/stats/license',
-    },
-    {
       label: 'Top 20 contributors',
       to: '/stats/contributors',
     },
@@ -24,13 +20,17 @@
       label: 'Top 10 languages',
       to: '/stats/languages',
     },
+    {
+      label: 'Most popular license',
+      to: '/stats/license',
+    },
   ];
 </script>
 
 <aside
-  class="fixed top-14 z-30 -ml-2 hidden h-[80vh] w-full shrink-0 md:sticky md:block"
+  class="fixed top-20 z-30 -ml-2 hidden h-[80vh] w-full shrink-0 md:sticky md:block"
 >
-  <ScrollArea class="fixed left-0 h-screen py-5 px-8">
+  <ScrollArea class="fixed top-20 left-0 h-screen py-5 px-8">
     <div class="">
       <div class="w-full flex justify-center mb-5">
         <img src={logo} alt="logo" class="w-28 h-28" />
