@@ -23,8 +23,8 @@ app.use('/v1/*', cors());
 app.get(
   '/v1/*',
   cache({
-    cacheName: 'nsapi',
-    cacheControl: 'max-age=900',
+    cacheName: 'nsapi-2',
+    cacheControl: 'max-age=60',
     wait: true,
   })
 );
