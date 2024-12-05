@@ -1,6 +1,12 @@
-# naija-stars
+# naijastars.dev
 
 Visualization of the open source projects built by Nigerian developers.
+
+## Links
+
+- Webapp - [naijastars.dev](https://naijastars.dev)
+- API - [api.naijastars.dev](https://api.naijastars.dev)
+- Docs - [naijastars.dev/api](https://naijastars.dev/api)
 
 ## Tech Stack
 
@@ -13,7 +19,7 @@ Visualization of the open source projects built by Nigerian developers.
 
 ## Demo
 
-> add video here
+[![Demo Video](/src/lib/assets/demo-thumbnail.png)](https://youtu.be/_xsIeTr7ack)
 
 ## Commands
 
