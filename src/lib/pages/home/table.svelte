@@ -221,6 +221,7 @@
                         href={`${cell.render()}`}
                         class="text-left font-medium underline"
                         target="_blank"
+                        rel="noopener noreferrer"
                       >
                         <Render
                           of={extractLastSegment(cell.render() || '') ||

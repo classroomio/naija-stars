@@ -7,6 +7,9 @@ export type Repository = {
   author_link: string;
   author_avatar: string;
 
+  author_madeinnigeria: string;
+  author_link_madeinnigeria: string;
+
   stars: number;
   topics: string[];
   license: {
