@@ -58,6 +58,10 @@ app.get('/repositories', async (c) => {
         CASE WHEN ${sortBy} = 'forks' AND ${order} = 'desc' THEN forks END DESC,
         CASE WHEN ${sortBy} = 'author' AND ${order} = 'asc' THEN author END ASC,
         CASE WHEN ${sortBy} = 'author' AND ${order} = 'desc' THEN author END DESC
+        CASE WHEN ${sortBy} = 'license' AND ${order} = 'asc' THEN license END ASC,
+        CASE WHEN ${sortBy} = 'license' AND ${order} = 'desc' THEN license END DESC
+        CASE WHEN ${sortBy} = 'language' AND ${order} = 'asc' THEN language END ASC,
+        CASE WHEN ${sortBy} = 'language' AND ${order} = 'desc' THEN language END DESC
       LIMIT ${limit}
       OFFSET ${offset};
     `;
