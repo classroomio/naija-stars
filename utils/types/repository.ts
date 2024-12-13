@@ -6,6 +6,15 @@ export interface ScrapedRepository {
   authorLink: string;
 }
 
+export interface Contributor {
+  login: string;
+  id: number;
+  node_id: string;
+  avatar_url: string;
+  html_url: string;
+  contributions: number
+}
+
 export interface DBRepository {
   name: string;
   link: string;
@@ -24,6 +33,8 @@ export interface DBRepository {
     name: string;
     url: string;
   };
+  language: string[];
+  contributors: Contributor[];
   forks: number;
   open_issues_count: number;
   archived: boolean;
