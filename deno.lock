@@ -6,6 +6,7 @@
     "jsr:@neon/serverless@~0.10.4": "0.10.4",
     "jsr:@ptm/mm-mark@~0.2.22": "0.2.22",
     "jsr:@std/assert@~0.213.1": "0.213.1",
+    "jsr:@std/dotenv@*": "0.225.2",
     "jsr:@std/dotenv@~0.225.2": "0.225.2",
     "jsr:@std/encoding@0.213.1": "0.213.1",
     "jsr:@std/fmt@0.213.1": "0.213.1",
@@ -22,6 +23,8 @@
     "npm:bits-ui@~0.21.16": "0.21.16_svelte@5.2.10__acorn@8.14.0",
     "npm:clsx@^2.1.1": "2.1.1",
     "npm:detect-url-change@^1.0.2": "1.0.2",
+    "npm:hono-rate-limiter@*": "0.2.3_hono@4.6.5",
+    "npm:hono@*": "4.6.5",
     "npm:js-yaml@^4.0.9": "4.1.0",
     "npm:lucide-svelte@0.462": "0.462.0_svelte@5.2.10__acorn@8.14.0",
     "npm:mode-watcher@0.5": "0.5.0_svelte@5.2.10__acorn@8.14.0",
@@ -35,6 +38,7 @@
     "npm:tailwind-merge@^2.5.5": "2.5.5",
     "npm:tailwind-variants@0.3": "0.3.0_tailwindcss@3.4.15__postcss@8.4.49",
     "npm:tailwindcss@^3.4.15": "3.4.15_postcss@8.4.49",
+    "npm:vite@*": "6.0.1",
     "npm:vite@^6.0.1": "6.0.1"
   },
   "jsr": {
@@ -1503,6 +1507,18 @@
     "zimmerframe@1.1.2": {
       "integrity": "sha512-rAbqEGa8ovJy4pyBxZM70hg4pE6gDgaQ0Sl9M3enG3I0d6H4XSAM3GeNGLKnsBpuijUow064sf7ww1nutC5/3w=="
     }
+  },
+  "remote": {
+    "https://deno.land/x/zod@v3.16.1/ZodError.ts": "6e56e6416bbbad3539b577b7636dc198e5d87cf59f1ceb4e7b58d1d38190c2f7",
+    "https://deno.land/x/zod@v3.16.1/external.ts": "433e13ff774fef22d416027308db33cacb719774898372ec5faa32bb572f11dc",
+    "https://deno.land/x/zod@v3.16.1/helpers/errorUtil.ts": "7a77328240be7b847af6de9189963bd9f79cab32bbc61502a9db4fe6683e2ea7",
+    "https://deno.land/x/zod@v3.16.1/helpers/parseUtil.ts": "2611b41b579f551fcf0799415f9793709637bc7c7778bf53aab73cea92e859db",
+    "https://deno.land/x/zod@v3.16.1/helpers/partialUtil.ts": "8dc921a02b47384cf52217c7e539268daf619f89319b75bdf13ea178815725df",
+    "https://deno.land/x/zod@v3.16.1/helpers/typeAliases.ts": "a1a8d039eb98925f242f5ea1e21e6d3cabd7f05e9747680165c914695c979b4f",
+    "https://deno.land/x/zod@v3.16.1/helpers/util.ts": "1d28cc4dfde641f20d8544a1a747cf745d5eda0c5cdeaca8a29837991254a67d",
+    "https://deno.land/x/zod@v3.16.1/index.ts": "035a7422d9f2be54daa0fe464254b69225b443000673e4794095d672471e8792",
+    "https://deno.land/x/zod@v3.16.1/mod.ts": "64e55237cb4410e17d968cd08975566059f27638ebb0b86048031b987ba251c4",
+    "https://deno.land/x/zod@v3.16.1/types.ts": "fff4c7909b1919989c4cc1abe6218dfbdb53e197cacb2dfad2831dbd71dc56d2"
   },
   "workspace": {
     "dependencies": [
