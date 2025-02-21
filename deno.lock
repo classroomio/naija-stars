@@ -28,7 +28,6 @@
     "npm:postcss@^8.4.49": "8.4.49",
     "npm:shadcn-svelte@0.14": "0.14.0",
     "npm:showdown-mathjax@^1.0.7": "1.0.7",
-    "npm:showdown-prism@^1.0.7": "1.0.8",
     "npm:showdown@^2.0.6": "2.1.0",
     "npm:svelte-headless-table@~0.18.3": "0.18.3_svelte@4.2.19",
     "npm:svelte-routing@^2.13.0": "2.13.0",
@@ -65,8 +64,7 @@
       "dependencies": [
         "npm:js-yaml",
         "npm:showdown",
-        "npm:showdown-mathjax",
-        "npm:showdown-prism"
+        "npm:showdown-mathjax"
       ]
     },
     "@std/assert@0.213.1": {
@@ -1240,14 +1238,6 @@
     "showdown-mathjax@1.0.7": {
       "integrity": "sha512-nJK/xXPRTfviv1A8Ax6UB0FtuifNHWIlkQofNRhq5SKmSSUtrA78S4jRZRWHUsYRaNdzIaJ57WoQcmP9Zp4WsA==",
       "dependencies": [
-        "showdown"
-      ]
-    },
-    "showdown-prism@1.0.8": {
-      "integrity": "sha512-+kHR39fMLtArcY/Oj4O1KNq3lu1I3D0ktqaRGl/Dv6uA8xh+de2cr0++ZqODcIvqG60mOZPDSIOtNqxynW4Bwg==",
-      "dependencies": [
-        "he",
-        "prismjs",
         "showdown"
       ]
     },
