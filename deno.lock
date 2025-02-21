@@ -35,6 +35,7 @@
     "npm:shadcn-svelte@latest": "0.14.0",
     "npm:showdown-mathjax@^1.0.7": "1.0.7",
     "npm:showdown-prism@^1.0.7": "1.0.8",
+    "npm:showdown-prism@^1.0.8": "1.0.8",
     "npm:showdown@^2.0.6": "2.1.0",
     "npm:svelte-headless-table@~0.18.3": "0.18.3_svelte@4.2.19",
     "npm:svelte-routing@^2.13.0": "2.13.0",
@@ -74,7 +75,7 @@
         "npm:js-yaml",
         "npm:showdown",
         "npm:showdown-mathjax",
-        "npm:showdown-prism"
+        "npm:showdown-prism@^1.0.8"
       ]
     },
     "@std/assert@0.213.1": {
