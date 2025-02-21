@@ -1,12 +1,13 @@
-import { neon } from '@neon/serverless';
-import { mdConverter } from '@ptm/mm-mark';
-import { DOMParser } from '@b-fuze/deno-dom';
-import { sleep } from './sleep.ts';
 import {
-  ScrapedRepository,
   DBRepository,
   GitHubRepository,
+  ScrapedRepository,
 } from '../types/repository.ts';
+
+import { DOMParser } from '@b-fuze/deno-dom';
+import { mdConverter } from '@ptm/mm-mark';
+import { neon } from '@neon/serverless';
+import { sleep } from './sleep.ts';
 
 const databaseUrl = Deno.env.get('DATABASE_URL')!;
 const sql = neon(databaseUrl);
