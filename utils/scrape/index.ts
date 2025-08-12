@@ -6,7 +6,7 @@ import {
 } from '../types/repository.ts';
 
 import { DOMParser } from '@b-fuze/deno-dom';
-import { mdConverter } from '@ptm/mm-mark';
+import { marked } from 'marked';
 import { neon } from '@neon/serverless';
 import { sleep } from './sleep.ts';
 
@@ -178,9 +178,7 @@ export const scrape = async () => {
   console.log('Fetch Complete');
 
   const markdownData = await response.text();
-  const converter = mdConverter();
-
-  const html = converter.makeHtml(markdownData);
+  const html = await marked(markdownData);
   const parser = new DOMParser();
   const document = parser.parseFromString(html, 'text/html');
 
