@@ -19,7 +19,7 @@
     "@hono-rate-limiter/cloudflare": "npm:@hono-rate-limiter/cloudflare@^0.2.1",
     "@hono-rate-limiter/redis": "npm:@hono-rate-limiter/redis@^0.1.4",
     "@neon/serverless": "jsr:@neon/serverless@^0.10.4",
-    "@ptm/mm-mark": "jsr:@ptm/mm-mark@^0.2.22",
+    "marked": "npm:marked@^14.1.2",
     "@std/dotenv": "jsr:@std/dotenv@^0.225.2",
     "@sveltejs/vite-plugin-svelte": "npm:@sveltejs/vite-plugin-svelte@^5.0.1",
     "@upstash/redis": "npm:@upstash/redis@^1.34.3",

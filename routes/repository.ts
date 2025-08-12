@@ -1,6 +1,6 @@
-import { z } from 'https://deno.land/x/zod@v3.16.1/mod.ts';
 import { Hono } from 'npm:hono';
 import { sql } from '../services/db.ts';
+import { z } from 'https://deno.land/x/zod@v3.16.1/mod.ts';
 
 const app = new Hono();
 
@@ -57,7 +57,11 @@ app.get('/repositories', async (c) => {
         CASE WHEN ${sortBy} = 'forks' AND ${order} = 'asc' THEN forks END ASC,
         CASE WHEN ${sortBy} = 'forks' AND ${order} = 'desc' THEN forks END DESC,
         CASE WHEN ${sortBy} = 'author' AND ${order} = 'asc' THEN author END ASC,
-        CASE WHEN ${sortBy} = 'author' AND ${order} = 'desc' THEN author END DESC
+        CASE WHEN ${sortBy} = 'author' AND ${order} = 'desc' THEN author END DESC,
+        CASE WHEN ${sortBy} = 'license' AND ${order} = 'asc' THEN license END ASC,
+        CASE WHEN ${sortBy} = 'license' AND ${order} = 'desc' THEN license END DESC,
+        CASE WHEN ${sortBy} = 'language' AND ${order} = 'asc' THEN language END ASC,
+        CASE WHEN ${sortBy} = 'language' AND ${order} = 'desc' THEN language END DESC
       LIMIT ${limit}
       OFFSET ${offset};
     `;
@@ -117,7 +121,7 @@ app.get('/repositories/search', async (c) => {
       pagination: {
         currentPage: 1,
         totalPages: 1,
-        totalItems: repositories.length,
+        totalItems: Array.isArray(repositories) ? repositories.length : 0,
         itemsPerPage: LIMIT_PER_PAGE,
         hasNextPage: false,
         hasPrevPage: false,
