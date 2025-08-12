@@ -1,7 +1,7 @@
 import {
+  Contributor,
   DBRepository,
   GitHubRepository,
-  Contributor,
   ScrapedRepository,
 } from '../types/repository.ts';
 
@@ -42,8 +42,11 @@ const fetchDataFromGithub = async (
       });
 
       const apiData = (await apiResponse.json()) as GitHubRepository;
+
       const languages = await fetchLanguages(apiData.languages_url);
-      const contributors = await fetchContributors(`${GITHUB_API_BASE}/${user}/${repo}/contributors`);
+      const contributors = await fetchContributors(
+        `${GITHUB_API_BASE}/${user}/${repo}/contributors`
+      );
 
       repositories.push({
         name: apiData.name,
@@ -64,7 +67,7 @@ const fetchDataFromGithub = async (
           name: apiData.license?.name || '',
           url: apiData.license?.url || '',
         },
-        language: languages,
+        languages,
         contributors,
         forks: apiData.forks || 0,
         open_issues_count: apiData.open_issues_count || 0,
@@ -109,10 +112,10 @@ function convertToJSON(repositories: string[]): ScrapedRepository[] {
 }
 
 const fetchLanguages = async (languageUrl: string): Promise<string[]> => {
-  if (languageUrl === '') {
+  if (!languageUrl) {
     return [];
   }
-  
+
   try {
     const response = await fetch(languageUrl, {
       headers: GITHUB_HEADERS,
@@ -123,15 +126,17 @@ const fetchLanguages = async (languageUrl: string): Promise<string[]> => {
     }
 
     const languagesData = await response.json();
-    return Object.keys(languagesData); 
+    return Object.keys(languagesData);
   } catch (error) {
     console.error(`Error fetching languages:`, error);
-    return []; 
+    return [];
   }
 };
 
-const fetchContributors = async (contributorsUrl: string): Promise<Contributor[]> => {
-  if (contributorsUrl === '') {
+const fetchContributors = async (
+  contributorsUrl: string
+): Promise<Contributor[]> => {
+  if (!contributorsUrl) {
     return [];
   }
 
@@ -154,7 +159,10 @@ const fetchContributors = async (contributorsUrl: string): Promise<Contributor[]
         contributions: contributor.contributions,
         profileUrl: contributor.html_url,
       }))
-      .sort((a: { contributions: number; }, b: { contributions: number; }) => b.contributions - a.contributions) // Sort by contributions descending
+      .sort(
+        (a: { contributions: number }, b: { contributions: number }) =>
+          b.contributions - a.contributions
+      ) // Sort by contributions descending
       .slice(0, 5);
 
     return sortedContributors;
@@ -163,7 +171,6 @@ const fetchContributors = async (contributorsUrl: string): Promise<Contributor[]
     return [];
   }
 };
-
 
 export const scrape = async () => {
   console.log('Fetching Repositories From GitHub...');
@@ -224,7 +231,7 @@ export const scrape = async () => {
         ${repo.stars || 0},
         ${repo.topics},
         ${repo.license},
-        ${repo.language},
+        ${repo.languages},
         ${repo.contributors},
         ${repo.forks || 0},
         ${repo.open_issues_count || 0},

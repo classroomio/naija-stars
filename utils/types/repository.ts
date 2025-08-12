@@ -12,7 +12,7 @@ export interface Contributor {
   node_id: string;
   avatar_url: string;
   html_url: string;
-  contributions: number
+  contributions: number;
 }
 
 export interface DBRepository {
@@ -33,7 +33,7 @@ export interface DBRepository {
     name: string;
     url: string;
   };
-  language: string[];
+  languages: string[];
   contributors: Contributor[];
   forks: number;
   open_issues_count: number;
